@@ -17,6 +17,4 @@ This repository is structured on an output basis.
 ## Software Implementation:
 
 
-## Contributors to this repository: 
-
 ## License: 
