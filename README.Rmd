@@ -1,0 +1,23 @@
+---
+title: "README"
+output: 
+  github_document:
+    toc: true
+    toc_depth: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Adoption and Diffusion of CGIAR-Related Agricultural Innovations in Viet Nam
+
+## Summary: 
+(Add table here)
+
+
+
+## VHLSS variable dictionary:
+
+
+## Software Implementation:
