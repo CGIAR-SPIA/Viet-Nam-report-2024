@@ -9,6 +9,8 @@ output:
 ```{r setup, include=FALSE, results='hide'}
 knitr::opts_chunk$set(echo = FALSE)
 library (flextable)
+library (officer)
+library (tidyverse)
 ```
 
 # Adoption and Diffusion of CGIAR-Related Agricultural Innovations in Viet Nam
@@ -16,10 +18,25 @@ library (flextable)
 ## Summary: 
 
 ```{r table}
-df <- data.frame ("Script" = NA, 
+section <- c ("General", 
+              "3. Aquaculture",
+              "4. Breeding innovations",
+              "5. Climate change adaptation options",
+              "7. Environmental Conservation",
+              "9. Mechanisation",
+              "10. Sustainable Intensification practices")
+df <- data.frame ("Section" = section, 
+                  "Script" = NA, 
                   "Data source" = NA, 
                   "Output" = NA)
-ft <- flextable (df)
+ft <- flextable (df) %>%
+  align(align = "center", part = "header", j = 1:4) %>%
+  bold(i = 1, part = "header") %>%
+  border_inner_h(part = "body", fp_border(width = 0.5)) %>%
+  border_inner_h(part = "header", fp_border(width = 0.5)) %>%
+  vline (j = 1:4, border = fp_border(width = 0.5), part = "body") %>%
+  border(i = 1, border.top = fp_border(width = 2)) %>%
+  autofit()
 
 ```
 

@@ -12,7 +12,7 @@ README
 
 ## Summary:
 
-<img src="README_files/figure-gfm/unnamed-chunk-3-1.png" width="492" />
+<img src="README_files/figure-gfm/unnamed-chunk-3-1.png" width="1126" />
 
 ## VHLSS variable dictionary:
 
