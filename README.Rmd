@@ -8,14 +8,22 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library (flextable)
 ```
 
 # Adoption and Diffusion of CGIAR-Related Agricultural Innovations in Viet Nam
 
 ## Summary: 
-(Add table here)
 
+```{r table}
+df <- data.frame ("Script" = NA, 
+                  "Data source" = NA, 
+                  "Output" = NA)
+ft <- flextable (df)
 
+```
+
+ft
 
 ## VHLSS variable dictionary:
 

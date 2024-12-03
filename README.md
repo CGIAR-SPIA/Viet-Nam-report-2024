@@ -12,7 +12,14 @@ README
 
 ## Summary:
 
-(Add table here)
+``` r
+df <- data.frame ("Script" = NA, 
+                  "Data source" = NA, 
+                  "Output" = NA)
+ft <- flextable (df)
+```
+
+ft
 
 ## VHLSS variable dictionary:
 
