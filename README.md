@@ -4,11 +4,6 @@ This repository is structured on an output basis.
 ## Summary: 
 (Add table here)
 
-## Table 1:
-- [Code script]()
-- [Data input]()
-- [Data output]
-## Table 2:
 
 
 ## VHLSS variable dictionary:
