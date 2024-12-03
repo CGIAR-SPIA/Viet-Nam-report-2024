@@ -1,0 +1,60 @@
+variable,value,label,meta
+MATINH,,Province ID,varlab
+MAHUYEN,,District ID,varlab
+MAXA,,Commune ID,varlab
+MADIABAN,,EA ID,varlab
+HOSO,,Household ID,varlab
+IDHO,,Household unique ID,varlab
+Genotype_rec,,Cassava genotype,varlab
+Genotype,,Cassava genotype,varlab
+CMD,,CMD-resistant cassava varieties (CMD2 QTL),varlab
+DMC,,High-starch cassava varieties (DM QTL),varlab
+CIAT.related,,CIAT research efforts on maintaining/improving elite cassava lines,varlab
+StrainB,,Tilapia Strain,varlab
+Strain,,Tilapia Strain,varlab
+Strain_present,,Tilapia Strain,varlab
+StrainB_edited,,Dummy if tilapia is GIFT-derived,varlab
+Strain_03_BEST,,Dummy if tilapia is BEST variety,varlab
+Strain_05_Molobicus,,Dummy if tilapia is Molobicus variety,varlab
+Strain_10_Mossambicus,,Dummy if tilapia is Mossambicus variety,varlab
+Strain_RIA1,,Dummy if tilapia is RIA1-derived,varlab
+Strain_Unassigned,,Dummy if tilapia variety is unassigned,varlab
+d_1m5r_certified,,Dummy if hh use certified seeds only,varlab
+lenient_1m,,Dummy if hh use both certified and own seeds,varlab
+d_1m5r_seed_100kg,,Dummy if hh apply a seed rate of 100kg/ha or less,varlab
+d_1m5r_seed_120kg,,Dummy if hh apply a seed rate of 120kg/ha or less,varlab
+strict_2r,,Dummy if hh comply with strict requirement in reducing fertilizer,varlab
+lenient_2r,,Dummy if hh comply with lenient requirement in reducing fertilizer,varlab
+strict_3r,,Dummy if hh comply with strict requirement in reducing pesticides,varlab
+lenient_3r,,Dummy if hh comply with lenient requirement in reducing pesticides,varlab
+harvest_combine,,Dummy if hh use a combine harvester (module 1M5R),varlab
+d_1m5r_harvest_timing,,Dummy if hh harvest when 80-90% of panicles are yellow-colored,varlab
+d_1m5r_harvest_store,,Dummy if hh use hermetic/aeration bags to store,varlab
+awd_1drydown,,Dummy if there is only 1 drydown between reproductive stage enduring at least 5 days,varlab
+awd_1drydown_intentional,,Dummy if there is only 1 INTENTIONAL drydown between reproductive stage enduring at least 5 days,varlab
+awd_2drydown,,"Dummy if there is >= 2 drydowns, all between reproductive stage, each enduring at least 5 days",varlab
+awd_2drydown_intentional,,"Dummy if there is >= 2 INTENTIONAL drydowns, all between reproductive stage, each enduring at least 5 days",varlab
+dummy_5r,,Dummy if hh use combine harvester and harvest at 80-90% yellow-colored,varlab
+mech_laser_level,,Dummy if hh use a laser levelling machine,varlab
+mech_combine_harvester,,Dummy if hh use a combine harvester (module Mechanization),varlab
+mech_straw_baler,,Dummy if hh use a straw baler,varlab
+mech_row_drum_seeder,,Dummy if hh use a row/drum seeder,varlab
+mech_seed_blower,,Dummy if hh use a seed blower,varlab
+panel,,Panel,varlab
+weight_final_rice,,Weight of rice-related innovations (non-DNA),varlab
+weight_cass,,Weight of DNA cassava-related innovations,varlab
+weight_gift,,Weight of DNA tilapia-related innovations,varlab
+weight_coffee,,Weight of coffee-related innovations (non-DNA),varlab
+THUNHAP,,"Annual income (in 1,000 VND)",varlab
+TONGCHITIEU,,"Annual consumption (in 1,000 VND)",varlab
+ethnic,,Household head from an ethnic minority,varlab
+Bottom_20,,% of households in bottom 20% of annual consumption,varlab
+Bottom_40,,% of households in bottom 40% of annual consumption,varlab
+rls_head,,Relationship to household head (1 = head),varlab
+age,,Age of household head (in years),varlab
+edu_grade,,Household head's highest completed grade,varlab
+n_member,,Household size,varlab
+male,,Dummy if household head is male,varlab
+female,,Household head is female,varlab
+internet,,Household has had access to internet  in the last 6 months,varlab
+land_area_sum,,Total agricultural land managed or used by the household (in sq.meter),varlab

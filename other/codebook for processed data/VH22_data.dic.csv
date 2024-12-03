@@ -1,0 +1,60 @@
+variable,value,label,meta
+MATINH,,Province ID,varlab
+IDHO,,HH unique ID,varlab
+MAHUYEN,,District ID,varlab
+MAXA,,Commune ID,varlab
+MADIABAN,,EA ID,varlab
+HOSO,,HH ID,varlab
+breeding_main_variety,,Self-reported name of the main variety in the plot,varlab
+Correct_name.DNA2,,DNA-based rice varietal identification,varlab
+breeding_seed_origin,,"Origin of the sampled seeds (1-Self-produced, 2-Seed club, 3-Seed company, 4-Research institute, 5-Extension center, 6-Cooperative, 7-Retailer, 8-Other)",varlab
+breeding_seed_duration,,Number of season the seed was recycled,varlab
+IRRI_Parentage,,DNA-based IRRI-relatedness,varlab
+Saltol,,Salt-tolerance QTL,varlab
+qSub1,,Submergence-tolerance QTL,varlab
+breeding_certified_seed,,"Self-reported certified seeds for sample (1 = Certified, 0 = Not certified)",varlab
+KYDIEUTRA,,Survey month/quarter,varlab
+mech_mini_combiner,,Dummy if mini-combine harvester is used for harvesting,varlab
+mech_combine_harvester,,Dummy if combine harvester is used for harvesting,varlab
+mech_straw_baler,,Dummy if straw baler is used for harvesting,varlab
+mech_row_seeder,,Dummy if row seeder is used for seeding in the last W-S season,varlab
+mech_seed_blower,,Dummy if seed blower is used for seeding in the last W-S season,varlab
+straw_burn,,Dummy if straws are burned on the plof after harvesting,varlab
+straw_incorporated_soil,,Dummy if straws are incorporated to the soil plot after harvesting,varlab
+straw_mulching,,Dummy if straws are left on the plot for mulching after harvesting,varlab
+straw_other,,Dummy if straws are used for other purposes after harvesting,varlab
+straw_remove_completely,,Dummy if straws are removed completely from the plot after harvesting,varlab
+straw_remove_partly,,Dummy if straws are removed partially from the plot after harvesting,varlab
+straw_rm_compost,,Dummy if straws are removed and used for compost,varlab
+straw_rm_cooking,,Dummy if straws are removed and used for cooking,varlab
+straw_rm_livestock,,Dummy if straws are removed and fed for livestock,varlab
+straw_rm_mushroom,,Dummy if straws are removed and used for mushroom cultivation,varlab
+straw_rm_other,,Dummy if straws are removed and used for other purposes,varlab
+straw_rm_sold,,Dummy is straws are removed and sold,varlab
+panel,,Panel year,varlab
+weight_final_rice,,Weight for rice-related innovations,varlab
+weight_rice_DNA,,Weight for rice DNA subsample,varlab
+THUNHAP,,"Annual income (in 1,000 VND)",varlab
+TONGCHITIEU,,"Annual consumption (in 1,000 VND)",varlab
+ethnic,,Household head from an ethnic minority,varlab
+rls_head,,Relationship to household head (1 = head),varlab
+age,,Age of household head (in years),varlab
+edu_grade,,Household head's highest completed grade,varlab
+n_member,,Household size,varlab
+male,,Dummy if household head is male,varlab
+female,,Household head is female,varlab
+internet,,Household has had access to internet  in the last 6 months,varlab
+land_area_sum,,Total agricultural land managed or used by the household (in sq.meter),varlab
+poor_commune,,Poor Commune label,varlab
+dummy_main_str,,Dummy if the commune has main access street,varlab
+dist_main_str,,Distance to main access street (=5km if commune has main street),varlab
+type_main_str,,"Type of main access street (1-Asphalt, 2-Tar on gravel, 3-Gravel, 4-Dirth or earth)",varlab
+dummy_local_market_wholesale,,Commune has wholesale market,varlab
+dist_market_wholesale,,Distance to wholesale market (km) (=5km if commune has wholesale market),varlab
+dummy_ext_center,,Dummy if commune has extension center,varlab
+dist_ext_center,,Distance to extension center (=5km if commune has extension center),varlab
+farmer_participation_pct,,% farmers' participation and engagement with extension center/staff,varlab
+dummy_protection_staff,,Commune has extension agent,varlab
+main_str_asphalt,,Main road is asphalt,varlab
+Bottom_20,,% of households in bottom 20% of annual consumption,varlab
+Bottom_40,,% of households in bottom 40% of annual consumption,varlab
