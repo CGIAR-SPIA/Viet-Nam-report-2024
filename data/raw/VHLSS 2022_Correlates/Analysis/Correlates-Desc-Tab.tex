@@ -1,0 +1,163 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[landscape,left=1cm,right=1cm,top=2cm,bottom=2cm]{geometry}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={Distribution of socio-economic characteristics using VHLSS 2022 and 2023 data},
+  pdfauthor={Binh Le},
+  colorlinks=true,
+  linkcolor={Maroon},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={blue},
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Distribution of socio-economic characteristics using VHLSS 2022
+and 2023 data}
+\author{Binh Le}
+\date{2024-06-25}
+
+\begin{document}
+\maketitle
+
+\hypertarget{modifications-needed}{%
+\section{Modifications needed:}\label{modifications-needed}}
+
+\begin{itemize}
+\tightlist
+\item
+  What is ethnicity? It should be clearer. ``HH head is from an ethnic
+  minority'' is probably what we need here
+\item
+  Convert ANnual Income, annual consumption in 1,000 VNs and ``Area of
+  Land manageed'' in ha (it seems to be in sq. meters?)
+\item
+  Add `Nb of years of education of HH Head' and ``Commune has a Plant
+  Protection Staff''
+\item
+  Recode ``HH head is male'' by `is female'
+\item
+  I've modified parts of line 488-507 and the table header too
+\item
+  At the end of the script, generate a dataset with these correlates,
+  and the IDs.
+\end{itemize}
+
+\hypertarget{descriptive-summary}{%
+\subsection{1.1. Descriptive Summary}\label{descriptive-summary}}
+
+\textbackslash begin\{table\}{[}!htbp{]}
+
+\begin{verbatim}
+       \centering
+
+       \caption{Descriptive Statistics of Core Variables (VH22, VH23 and Both Years)}
+
+       \label{tab:combined_stats}
+
+       \begin{tabular}{l|ccc|ccc|ccc}
+
+       \hline \hline
+
+       Variable & \multicolumn{3}{c|}{Sample A (VH22)} & \multicolumn{3}{c|}{Sample B (VH23)} & \multicolumn{3}{c}{Panel (A-B)} \\
+
+       - & N & Mean & Std. Dev. & N & Mean & Std. Dev. & N & Mean & Std. Dev. \\
+
+       \hline Household head is ethnic minority & 13,885 & 3.603 & 5.528 & 6,397 & 3.844 & 6.127 & 5,728 & 4.028 & 6.291 \\ 
+\end{verbatim}
+
+Age of household head (in yrs) \& 13,885 \& 52.024 \& 12.221 \& 6,397 \&
+52.004 \& 12.542 \& 5,728 \& 51.846 \& 12.127 \textbackslash{} Education
+of hh head: highest completed grade \& 12,940 \& 7.595 \& 3.052 \& 6,397
+\& 14.501 \& 24.336 \& 5,285 \& 7.579 \& 3.071 \textbackslash{}
+Household size \& 13,885 \& 4.011 \& 1.676 \& 6,397 \& 4.025 \& 1.688 \&
+5,728 \& 4.091 \& 1.682 \textbackslash{} \% of households with female
+head \& 13,885 \& 0.839 \& 0.368 \& 6,397 \& 0.830 \& 0.375 \& 5,728 \&
+0.843 \& 0.364 \textbackslash{} \% of households with internet access \&
+13,885 \& 0.620 \& 0.486 \& 6,397 \& 0.605 \& 0.489 \& 5,728 \& 0.602 \&
+0.490 \textbackslash{} Annual income (in 1,000 VND) \& 13,885 \&
+144,210.500 \& 128,272.300 \& 6,397 \& 145,626.300 \& 123,935.200 \&
+5,728 \& 143,926.000 \& 122,666.800 \textbackslash{} Annual consumption
+(in 1,000 VND) \& 8,333 \& 30,770.450 \& 139,608.500 \& 3,837 \&
+28,902.770 \& 56,504.510 \& 3,451 \& 28,648.990 \& 56,277.450
+\textbackslash{} Area of land managed or used by hh (in ha) \& 13,739 \&
+9,674.706 \& 15,941.530 \& 6,052 \& 9,976.915 \& 17,195.680 \& 5,671 \&
+10,144.270 \& 17,254.140 \textbackslash{} Commune is labeled as poor
+(\%) \& 12,684 \& 0.247 \& 0.431 \& 5,858 \& 0.238 \& 0.426 \& 5,281 \&
+0.251 \& 0.433 \textbackslash{} Main access road is asphalt \& 12,684 \&
+1.273 \& 0.594 \& 5,858 \& 0.802 \& 0.398 \& 5,281 \& 1.244 \& 0.566
+\textbackslash{} Distance to wholesale market (in km) \& 12,216 \&
+15.513 \& 25.964 \& 6,397 \& 15.325 \& 28.154 \& 5,116 \& 17.005 \&
+30.340 \textbackslash{} Distance to extension center (in km) \& 12,006
+\& 13.844 \& 12.286 \& 6,397 \& 13.079 \& 11.717 \& 5,107 \& 14.374 \&
+12.278 \textbackslash{} \hline \textbackslash{[}-1.8ex{]}
+\hline \textbackslash{[}-1.8ex{]} \hline \textbackslash{[}-1.8ex{]}~
+\textbackslash end\{tabular\} \textbackslash end\{tabular\}
+\textbackslash end\{tabular\}~ \textbackslash end\{table\}
+\textbackslash end\{table\} \textbackslash end\{table\}~ NANANA~ NANANA~
+NANANA~ NANANA~ \hline
+
+\textbackslash end\{tabular\}
+
+\textbackslash end\{table\}
+
+\end{document}

@@ -1,0 +1,656 @@
+---
+title: "Distribution of socio-economic characteristics using VHLSS 2022 and 2023 data"
+author: "Binh Le"
+date: "`r Sys.Date()`"
+output: pdf_document
+urlcolor: blue
+geometry: "landscape,left=1cm,right=1cm,top=2cm,bottom=2cm"
+---
+
+
+
+
+```{r setup, include=FALSE}
+library(formatR)
+library(tinytex)
+
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, comment = FALSE, results = 'hide', fig.align = "center", fig.width = 12)
+rm(list = ls())
+
+```
+
+
+# Modifications needed:
+- What is ethnicity? It should be clearer. "HH head is from an ethnic minority" is probably what we need here
+- Convert ANnual Income, annual consumption in 1,000 VNs and "Area of Land manageed" in ha (it seems to be in sq. meters?) 
+- Add 'Nb of years of education of HH Head' and "Commune has a Plant Protection Staff"
+- Recode  "HH head is male" by 'is female'
+- I've modified parts of line 488-507 and the table header too
+- At the end of the script, generate a dataset with these correlates, and the IDs.
+
+
+
+```{r farming_hh_id}
+
+library (haven)
+library (tidyverse)
+
+hh_ag_22 <- read.csv ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS_Household_2022/datasets/Ho_Muc4B11_edited.csv") %>%
+  select (c("IDHO", "HOSO", starts_with("MA")))
+
+hh_ag_22$MATINH <- as.character(hh_ag_22$MATINH)
+hh_ag_22$MAHUYEN <- as.character(hh_ag_22$MAHUYEN)
+hh_ag_22$MAXA <- as.character(hh_ag_22$MAXA)
+hh_ag_22$MADIABAN <- as.character(hh_ag_22$MADIABAN)
+hh_ag_22$IDHO <- as.character(hh_ag_22$IDHO)
+hh_ag_22$HOSO <- as.character(hh_ag_22$HOSO)
+
+
+hh_ag_22$MATINH <- str_pad(hh_ag_22$MATINH, width = 2, pad = "0")
+hh_ag_22$MAHUYEN <- str_pad(hh_ag_22$MAHUYEN, width = 3, pad = "0")
+hh_ag_22$MAXA <- str_pad(hh_ag_22$MAXA, width = 5, pad = "0")
+hh_ag_22$MADIABAN <- str_pad(hh_ag_22$MADIABAN, width = 3, pad = "0")
+hh_ag_22$HOSO <- str_pad(hh_ag_22$HOSO, width = 3, pad = "0")
+
+# hh_ag_22 <- hh_ag_22 %>%
+#   mutate (panel = 2022)
+
+
+unique_hh_ag_22 <- hh_ag_22[!duplicated(hh_ag_22$IDHO), ]
+
+
+hh_ag_23 <- read.csv("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS_Household_2023/Final/Muc4B11.csv") %>%
+  select (c("IDHO", "HOSO", starts_with("MA"))) 
+
+
+hh_ag_23$MATINH <- as.character(hh_ag_23$MATINH)
+hh_ag_23$MAHUYEN <- as.character(hh_ag_23$MAHUYEN)
+hh_ag_23$MAXA <- as.character(hh_ag_23$MAXA)
+hh_ag_23$MADIABAN <- as.character(hh_ag_23$MADIABAN)
+hh_ag_23$IDHO <- as.character(hh_ag_23$IDHO)
+hh_ag_23$HOSO <- as.character(hh_ag_23$HOSO)
+
+hh_ag_23$MATINH <- str_pad(hh_ag_23$MATINH, width = 2, pad = "0")
+hh_ag_23$MAHUYEN <- str_pad(hh_ag_23$MAHUYEN, width = 3, pad = "0")
+hh_ag_23$MAXA <- str_pad(hh_ag_23$MAXA, width = 5, pad = "0")
+hh_ag_23$MADIABAN <- str_pad(hh_ag_23$MADIABAN, width = 3, pad = "0")
+hh_ag_23$HOSO <- str_pad(hh_ag_23$HOSO, width = 3, pad = "0")
+hh_ag_23$IDHO <- paste0 (hh_ag_23$MAXA, hh_ag_23$MADIABAN, hh_ag_23$HOSO)
+
+# hh_ag_23 <- hh_ag_23 %>%
+#   mutate (panel = 2023)
+
+
+unique_hh_ag_23 <- hh_ag_23[!duplicated(hh_ag_23$IDHO), ]
+
+
+df_farming <- inner_join (unique_hh_ag_22, unique_hh_ag_23, by = c("IDHO", 
+                                             "HOSO",
+                                             "MATINH",
+                                             "MAHUYEN",
+                                             "MAXA",
+                                             "MADIABAN"))
+
+
+```
+
+
+```{r hh_22 data}
+
+
+ho_thanhvien_22 <- read_dta ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VH22_Correlates/Ho_ThanhVien.dta") %>%
+  select(c(starts_with(c("MA", "IDHO")),  "HOSO", "M1A_C2", "M1A_C3", "M1A_C5", "M2_C1", "M1A_C10", "KYDIEUTRA")) %>%
+  group_by(IDHO) %>%
+  mutate (n_member = n()) %>%
+  rename (c("gender" = "M1A_C2",
+            "rls_head" = "M1A_C3", 
+            "age" = "M1A_C5",
+            "edu_grade" = "M2_C1")) %>%
+  filter (rls_head == 1) %>%
+  mutate (male = case_when(gender==1 ~ 1,
+                           gender==2 ~ 0,
+                           TRUE ~ NA)) %>%
+  mutate (female = case_when (male == 1 ~ 0,
+                              male == 0 ~ 1,
+                              TRUE ~ NA)) %>%
+  mutate (internet = case_when (M1A_C10 == 1 ~ 1,
+                                M1A_C10 == 2 ~ 0,
+                                TRUE ~ NA)) %>%
+  select (-c("gender", "M1A_C10"))
+
+
+ho_thanhvien_22$edu_grade[ho_thanhvien_22$edu_grade == 99] <- NA
+
+
+
+ho_thongtinho_22 <- read_dta ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VH22_Correlates/Ho_ThongTinHo.dta") %>%
+  select(c(starts_with(c("MA", "IDHO")), "HOSO", "DANTOCCHUHO", "THUNHAP", "TONGCHITIEU"))
+
+
+
+
+
+ho_muc4b0_22 <- read_dta ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VH22_Correlates/ho_muc4b0.dta") %>%
+  rename(c("id_land" = "M4B0_MA",
+             "land_area" = "M4B0_C3")) %>%
+  pivot_wider(names_from = id_land,
+              values_from = land_area,
+              names_prefix = "land_area_") %>%
+  mutate (land_area_sum = rowSums(select(., starts_with("land_area_")), na.rm = TRUE))
+
+
+
+
+
+ho_thongtinho_22$MATINH <- as.character(ho_thongtinho_22$MATINH)
+ho_thongtinho_22$MAHUYEN <- as.character(ho_thongtinho_22$MAHUYEN)
+ho_thongtinho_22$MAXA <- as.character(ho_thongtinho_22$MAXA)
+ho_thongtinho_22$MADIABAN <- as.character(ho_thongtinho_22$MADIABAN)
+ho_thongtinho_22$IDHO <- as.character(ho_thongtinho_22$IDHO)
+
+
+
+ho_thanhvien_22$MATINH <- as.character(ho_thanhvien_22$MATINH)
+ho_thanhvien_22$MAHUYEN <- as.character(ho_thanhvien_22$MAHUYEN)
+ho_thanhvien_22$MAXA <- as.character(ho_thanhvien_22$MAXA)
+ho_thanhvien_22$MADIABAN <- as.character(ho_thanhvien_22$MADIABAN)
+ho_thanhvien_22$IDHO <- as.character(ho_thanhvien_22$IDHO)
+
+
+
+
+ho_muc4b0_22$MATINH <- as.character(ho_muc4b0_22$MATINH)
+ho_muc4b0_22$MAHUYEN <- as.character(ho_muc4b0_22$MAHUYEN)
+ho_muc4b0_22$MAXA <- as.character(ho_muc4b0_22$MAXA)
+ho_muc4b0_22$MADIABAN <- as.character(ho_muc4b0_22$MADIABAN)
+ho_muc4b0_22$IDHO <- as.character(ho_muc4b0_22$IDHO)
+
+
+hh_df_22 <- full_join (ho_thongtinho_22, ho_thanhvien_22) %>%
+  full_join(ho_muc4b0_22) %>%
+  group_by (IDHO) 
+
+
+
+
+hh_df_22$MATINH <- str_pad(hh_df_22$MATINH, width = 2, pad = "0")
+hh_df_22$MAHUYEN <- str_pad(hh_df_22$MAHUYEN, width = 3, pad = "0")
+hh_df_22$MAXA <- str_pad(hh_df_22$MAXA, width = 5, pad = "0")
+hh_df_22$MADIABAN <- str_pad(hh_df_22$MADIABAN, width = 3, pad = "0")
+hh_df_22$HOSO <- str_pad(hh_df_22$HOSO, width = 3, pad = "0")
+
+
+hh_df_22$IDHO <- paste0(hh_df_22$MAXA, hh_df_22$MADIABAN, hh_df_22$HOSO)   #hh socio-econs all data
+
+
+```
+
+
+```{r commune}
+xa_thongtinxa_22 <- read_dta ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VH22_Correlates/Xa_ThongTinXa.dta") %>%
+  rename (c("dist_main_str" = "M5C5", 
+            "type_main_str" = "M5C7",
+            "disease_1" = "M7C1A",
+            "disease_2" = "M7C1B",
+            "disease_3" = "M7C1C")) %>%
+  mutate (poor_commune = case_when (M1C14 ==1 ~ 1,
+                                    M1C14 ==2 ~ 0,
+                                    TRUE ~ NA),
+          dummy_main_str = case_when (M5C4 == 1 ~ 1,
+                                      M5C4 == 2 ~ 0,
+                                      TRUE ~ NA)) %>%
+  select (-c("M1C14", "M5C4")) %>%
+  relocate(c("poor_commune", "dummy_main_str"), .before = "dist_main_str") %>%
+  select (-"KYDIEUTRA")
+
+
+xa_muc5a_22 <- read_dta ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VH22_Correlates/Xa_Muc5A.dta") %>%
+  rename (c("id_market" = "M5STT1",
+            "dist_market" = "M5C25")) %>%
+  mutate (dummy_local_market = case_when (M5C24 == 1 ~ 1,
+                                          M5C24 == 2 ~ 0,
+                                          TRUE ~ NA)) %>%
+  select(-"M5C24") %>%
+  pivot_wider (names_from = id_market,
+               values_from = c("dummy_local_market", "dist_market")) %>%
+  rename (c("dummy_local_market_daily" = "dummy_local_market_1",
+            "dummy_local_market_periodic" = "dummy_local_market_2",
+            "dummy_local_market_wholesale" = "dummy_local_market_3",
+            "dist_market_daily" = "dist_market_1",
+            "dist_market_periodic" = "dist_market_2",
+            "dist_market_wholesale" = "dist_market_3"))  %>%
+  select (-"KYDIEUTRA")
+
+
+xa_muc4c_22 <- read_dta ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VH22_Correlates/Xa_Muc4C.dta") %>%
+  rename (c("dist_irrigation" = "M4C27",
+            "irrigation_info_1" = "M4C28A",
+            "irrigation_info_2" = "M4C28B",
+            "irrigation_info_3" = "M4C28C", 
+            "farmer_participation_pct" = "M4C29", 
+            "ag_challenge_1" = "M4C37A",
+            "ag_challenge_2" = "M4C37B",
+            "ag_challenge_3" = "M4C37C")) %>%
+  select (-c(ends_with("GHIRO"), "M4C33")) %>%
+  mutate (dummy_irrigation = case_when (M4C26 ==1 ~ 1,
+                                        M4C26 ==2 ~ 0,
+                                        TRUE ~ NA),
+          dummy_protection_staff = case_when (M4C34 == 1 ~ 1,
+                                              M4C34 == 2 ~ 0,
+                                              TRUE ~ NA)) %>%
+  select (-c("M4C26", "M4C34")) %>%
+  relocate ("dummy_irrigation", .before = "dist_irrigation") %>%
+  relocate ("dummy_protection_staff", .before = "irrigation_info_1")  %>%
+  select (-"KYDIEUTRA")
+            
+            
+
+xa_thongtinxa_22$MATINH <- as.character(xa_thongtinxa_22$MATINH)
+xa_thongtinxa_22$MAHUYEN <- as.character(xa_thongtinxa_22$MAHUYEN)
+xa_thongtinxa_22$MAXA <- as.character(xa_thongtinxa_22$MAXA)
+
+
+xa_muc5a_22$MATINH <- as.character(xa_muc5a_22$MATINH)
+xa_muc5a_22$MAHUYEN <- as.character(xa_muc5a_22$MAHUYEN)
+xa_muc5a_22$MAXA <- as.character(xa_muc5a_22$MAXA)
+
+
+
+xa_muc4c_22$MATINH <- as.character(xa_muc4c_22$MATINH)
+xa_muc4c_22$MAHUYEN <- as.character(xa_muc4c_22$MAHUYEN)
+xa_muc4c_22$MAXA <- as.character(xa_muc4c_22$MAXA)
+
+commune_df_22 <- full_join (xa_thongtinxa_22, xa_muc5a_22) %>%
+  full_join(xa_muc4c_22)
+```
+
+```{r merge_df}
+hh_commune_df_22 <- left_join(hh_df_22, commune_df_22) 
+
+#Panel 2022
+
+df_22 <- left_join (unique_hh_ag_22, hh_commune_df_22) 
+
+df_22 <- df_22 %>%
+  mutate (panel = paste0("2022 (n = ", nrow(df_22), ")"))
+
+# Both panel
+data  <- left_join (df_farming, hh_commune_df_22)
+
+data <- data %>%
+  mutate (panel = paste0("Both year (n = ", nrow(data), ")"))  #data that in both datasets
+
+```
+
+
+
+
+
+
+
+
+```{r vh23_prep}
+##Uncomment when VH23 is ready:
+
+
+ho_thanhvien_23 <- read_dta ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VH22_Correlates/Ho_ThanhVien.dta") %>%
+  select(c(starts_with(c("MA", "IDHO")),  "HOSO", "M1A_C2", "M1A_C3", "M1A_C5", "M2_C1", "M1A_C10", "KYDIEUTRA")) %>%
+  group_by(IDHO) %>%
+  mutate (n_member = n()) %>%
+  rename (c("gender" = "M1A_C2",
+            "rls_head" = "M1A_C3",
+            "age" = "M1A_C5",
+            "edu_grade" = "M2_C1")) %>%
+  filter (rls_head == 1) %>%
+  mutate (male = case_when(gender==1 ~ 1,
+                           gender==2 ~ 0,
+                           TRUE ~ NA)) %>%
+  mutate (internet = case_when (M1A_C10 == 1 ~ 1,
+                                M1A_C10 == 2 ~ 0,
+                                TRUE ~ NA)) %>%
+  select (-c("gender", "M1A_C10"))
+
+
+ho_thanhvien_23$edu_grade[ho_thanhvien_22$edu_grade == 99] <- NA
+
+
+
+ho_thongtinho_23 <- read_dta ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VH22_Correlates/Ho_ThongTinHo.dta") %>%
+  select(c(starts_with(c("MA", "IDHO")), "HOSO", "DANTOCCHUHO", "THUNHAP", "TONGCHITIEU"))
+
+
+
+
+
+ho_muc4b0_23 <- read_dta ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VH22_Correlates/ho_muc4b0.dta") %>%
+  rename(c("id_land" = "M4B0_MA",
+             "land_area" = "M4B0_C3")) %>%
+  pivot_wider(names_from = id_land,
+              values_from = land_area,
+              names_prefix = "land_area_") %>%
+  mutate (land_area_sum = rowSums(select(., starts_with("land_area_")), na.rm = TRUE))
+
+
+
+
+
+
+ho_thongtinho_23$MATINH <- as.character(ho_thongtinho_23$MATINH)
+ho_thongtinho_23$MAHUYEN <- as.character(ho_thongtinho_23$MAHUYEN)
+ho_thongtinho_23$MAXA <- as.character(ho_thongtinho_23$MAXA)
+ho_thongtinho_23$MADIABAN <- as.character(ho_thongtinho_23$MADIABAN)
+ho_thongtinho_23$IDHO <- as.character(ho_thongtinho_23$IDHO)
+
+
+
+ho_thanhvien_23$MATINH <- as.character(ho_thanhvien_23$MATINH)
+ho_thanhvien_23$MAHUYEN <- as.character(ho_thanhvien_23$MAHUYEN)
+ho_thanhvien_23$MAXA <- as.character(ho_thanhvien_23$MAXA)
+ho_thanhvien_23$MADIABAN <- as.character(ho_thanhvien_23$MADIABAN)
+ho_thanhvien_23$IDHO <- as.character(ho_thanhvien_23$IDHO)
+
+
+
+
+ho_muc4b0_23$MATINH <- as.character(ho_muc4b0_23$MATINH)
+ho_muc4b0_23$MAHUYEN <- as.character(ho_muc4b0_23$MAHUYEN)
+ho_muc4b0_23$MAXA <- as.character(ho_muc4b0_23$MAXA)
+ho_muc4b0_23$MADIABAN <- as.character(ho_muc4b0_23$MADIABAN)
+ho_muc4b0_23$IDHO <- as.character(ho_muc4b0_23$IDHO)
+
+
+hh_df_23 <- full_join (ho_thongtinho_23, ho_thanhvien_23) %>%
+  full_join(ho_muc4b0_23) %>%
+  group_by (IDHO)
+
+
+
+
+hh_df_23$MATINH <- str_pad(hh_df_23$MATINH, width = 2, pad = "0")
+hh_df_23$MAHUYEN <- str_pad(hh_df_23$MAHUYEN, width = 3, pad = "0")
+hh_df_23$MAXA <- str_pad(hh_df_23$MAXA, width = 5, pad = "0")
+hh_df_23$MADIABAN <- str_pad(hh_df_23$MADIABAN, width = 3, pad = "0")
+hh_df_23$HOSO <- str_pad(hh_df_23$HOSO, width = 3, pad = "0")
+
+
+hh_df_23$IDHO <- paste0(hh_df_23$MAXA, hh_df_23$MADIABAN, hh_df_23$HOSO)   #hh socio-econs all data
+
+
+
+
+
+xa_thongtinxa_23 <- read_dta ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VH22_Correlates/Xa_ThongTinXa.dta") %>%
+  rename (c("dist_main_str" = "M5C5",
+            "type_main_str" = "M5C7",
+            "disease_1" = "M7C1A",
+            "disease_2" = "M7C1B",
+            "disease_3" = "M7C1C")) %>%
+  mutate (poor_commune = case_when (M1C14 ==1 ~ 1,
+                                    M1C14 ==2 ~ 0,
+                                    TRUE ~ NA),
+          dummy_main_str = case_when (M5C4 == 1 ~ 1,
+                                      M5C4 == 2 ~ 0,
+                                      TRUE ~ NA)) %>%
+  select (-c("M1C14", "M5C4")) %>%
+  relocate(c("poor_commune", "dummy_main_str"), .before = "dist_main_str") %>%
+  select (-"KYDIEUTRA")
+
+
+xa_muc5a_23 <- read_dta ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VH22_Correlates/Xa_Muc5A.dta") %>%
+  rename (c("id_market" = "M5STT1",
+            "dist_market" = "M5C25")) %>%
+  mutate (dummy_local_market = case_when (M5C24 == 1 ~ 1,
+                                          M5C24 == 2 ~ 0,
+                                          TRUE ~ NA)) %>%
+  select(-"M5C24") %>%
+  pivot_wider (names_from = id_market,
+               values_from = c("dummy_local_market", "dist_market")) %>%
+  rename (c("dummy_local_market_daily" = "dummy_local_market_1",
+            "dummy_local_market_periodic" = "dummy_local_market_2",
+            "dummy_local_market_wholesale" = "dummy_local_market_3",
+            "dist_market_daily" = "dist_market_1",
+            "dist_market_periodic" = "dist_market_2",
+            "dist_market_wholesale" = "dist_market_3"))  %>%
+  select (-"KYDIEUTRA")
+
+
+xa_muc4c_23 <- read_dta ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VH22_Correlates/Xa_Muc4C.dta") %>%
+  rename (c("dist_irrigation" = "M4C27",
+            "irrigation_info_1" = "M4C28A",
+            "irrigation_info_2" = "M4C28B",
+            "irrigation_info_3" = "M4C28C",
+            "farmer_participation_pct" = "M4C29",
+            "ag_challenge_1" = "M4C37A",
+            "ag_challenge_2" = "M4C37B",
+            "ag_challenge_3" = "M4C37C")) %>%
+  select (-c(ends_with("GHIRO"), "M4C33")) %>%
+  mutate (dummy_irrigation = case_when (M4C26 ==1 ~ 1,
+                                        M4C26 ==2 ~ 0,
+                                        TRUE ~ NA),
+          dummy_protection_staff = case_when (M4C34 == 1 ~ 1,
+                                              M4C34 == 2 ~ 0,
+                                              TRUE ~ NA)) %>%
+  select (-c("M4C26", "M4C34")) %>%
+  relocate ("dummy_irrigation", .before = "dist_irrigation") %>%
+  relocate ("dummy_protection_staff", .before = "irrigation_info_1")  %>%
+  select (-"KYDIEUTRA")
+
+
+
+xa_thongtinxa_23$MATINH <- as.character(xa_thongtinxa_23$MATINH)
+xa_thongtinxa_23$MAHUYEN <- as.character(xa_thongtinxa_23$MAHUYEN)
+xa_thongtinxa_23$MAXA <- as.character(xa_thongtinxa_23$MAXA)
+
+
+xa_muc5a_23$MATINH <- as.character(xa_muc5a_23$MATINH)
+xa_muc5a_23$MAHUYEN <- as.character(xa_muc5a_23$MAHUYEN)
+xa_muc5a_23$MAXA <- as.character(xa_muc5a_23$MAXA)
+
+
+
+xa_muc4c_23$MATINH <- as.character(xa_muc4c_23$MATINH)
+xa_muc4c_23$MAHUYEN <- as.character(xa_muc4c_23$MAHUYEN)
+xa_muc4c_23$MAXA <- as.character(xa_muc4c_23$MAXA)
+
+commune_df_23 <- full_join (xa_thongtinxa_23, xa_muc5a_23) %>%
+  full_join(xa_muc4c_23)
+
+
+hh_commune_df_23 <- left_join(hh_df_23, commune_df_22) 
+
+df_23 <- left_join (unique_hh_ag_23, hh_commune_df_23)
+
+
+df_23 <- df_23 %>%
+  mutate (panel = paste0("2023 (n = ", nrow(df_23), ")"))
+
+
+### POST-MEETING ###
+
+# Recode distance to wholesale market (in km)
+#table (df_23$dist_market_wholesale, df_23$dummy_local_market_wholesale) # NA on distance when inside the commune
+#mean (df_23$dist_market_wholesale, na.rm=TRUE) # 16km on average when outside commune
+#sum (is.na (df_23$dist_market_wholesale)) # n=732 have market in their commune
+#sum (df_23$dist_market_wholesale <0, na.rm=TRUE) # n=522 have negative distances
+df_23$dist_market_wholesale [is.na (df_23$dist_market_wholesale)] <- 5
+df_23$dist_market_wholesale [df_23$dist_market_wholesale < 0] <- 0
+
+
+# Recode Main access road is asphalt
+#table (df_23$type_main_str)
+df_23$type_main_str <- ifelse (df_23$type_main_str == 1, TRUE, FALSE)
+
+
+# Recode distance to irrigation 
+#table (df_23$dist_irrigation, df_23$dummy_irrigation) # NA on distance when inside the commune
+#mean (df_23$dist_irrigation, na.rm=TRUE) # 14km on average when outside commune
+#sum (is.na (df_23$dist_irrigation)) # n=738 have irrigation in their commune
+#sum (df_23$dist_irrigation <0, na.rm=TRUE) # n=522 have negative distances
+df_23$dist_irrigation [is.na (df_23$dist_irrigation)] <- 5
+
+# Recode Distance to extension center ???
+df_23 <- df_23 [, -c(26,32,33,34,35,36,40)]
+
+rm(list=setdiff(ls(), c("df_22", "df_23", "data")))
+
+
+```
+## 1.1. Descriptive Summary
+
+```{r descriptive}
+
+var_group_stat <- c ("DANTOCCHUHO", 
+                "age",
+                "edu_grade",
+                "n_member",
+                "male",
+                "internet",
+                "THUNHAP",
+                "TONGCHITIEU",
+                "land_area_sum",
+                "poor_commune",
+                #"dummy_main_str",
+                "type_main_str", 
+                #"dummy_local_market_daily",
+                #"dummy_local_market_periodic",
+                #"dummy_local_market_wholesale",
+                #"dist_market_daily",
+                #"dist_market_periodic",
+                "dist_market_wholesale",
+               # "dummy_irrigation",
+                "dist_irrigation")
+
+var_name_group_stat <- c ("Household head is ethnic minority", 
+                     "Age of household head (in yrs)",
+                     "Education of hh head: highest completed grade",
+                     "Household size",
+                     "% of households with female head",
+                     "% of households with internet access",
+                     "Annual income (in 1,000 VND)",
+                     "Annual consumption (in 1,000 VND)",
+                     "Area of land managed or used by hh (in ha)",
+                     "Commune is labeled as poor (%)",
+                     #"Commune having main access road(%)",
+                     "Main access road is asphalt", 
+                     #"Commune having daily market (%)",
+                     #"Commune having periodic market (%)",
+                     #"Commune having wholesale market (%)",
+                     #"Distance to daily market (in km)",
+                     #"Distance to periodic market (in km)",
+                     "Distance to wholesale market (in km)",
+                     #"Commune having extension center (%)",
+                     "Distance to extension center (in km)")
+
+
+library (stargazer)
+library (knitr)
+
+stat_df_22 <- df_22[var_group_stat]
+stat_df_panel <- data[var_group_stat]
+
+
+stat_table_22 <- stargazer(as.data.frame(stat_df_22), 
+                           covariate.labels = var_name_group_stat,
+                           summary = TRUE,
+                           min.max = FALSE)
+
+stat_table_panel <- stargazer(as.data.frame(stat_df_panel),
+                              covariate.labels = var_name_group_stat,
+                              summary = TRUE,
+                              min.max = FALSE)
+
+```
+
+```{r vh23_stat}
+
+#Uncomment code when VH23 is ready:
+stat_df_23 <- df_23[var_group_stat]
+
+
+stat_table_23 <- stargazer(as.data.frame(stat_df_23),
+                           covariate.labels = var_name_group_stat,
+                           summary = TRUE,
+                           min.max = FALSE)
+
+```
+
+```{r prepare_table, results = 'asis'}
+
+# Trim trailing '\\\\' from each element in stat_table_22_stats
+out_22 <- stat_table_22[12:31]
+
+out_panel <- stat_table_panel[12:31]
+
+
+out_22_trimmed <- gsub("\\\\\\\\ $", "", out_22)
+
+
+
+out_panel_trimmed_end <- sub("\\\\\\\\ $", "\\\\", out_panel)
+out_panel_trimmed_final <- substring(out_panel_trimmed_end, regexpr("&", out_panel_trimmed_end))
+
+```
+
+
+```{r vh23_prep_table}
+#Uncomment when VH23 is ready
+
+out_23 <- stat_table_23[12:31]
+
+
+
+out_23_trimmed <- substring(out_23, regexpr("&", out_23)) 
+
+out_23_final <- gsub("\\\\\\\\ $", "", out_23_trimmed)
+
+
+table_mid <- paste0(out_22_trimmed, out_23_final, out_panel_trimmed_final)
+
+```
+
+
+```{r merge_full_table}
+
+
+# # Combine the trimmed statistics
+# table_mid <- paste0(out_22_trimmed, out_panel_trimmed_final)
+
+# Remove trailing whitespace and newlines
+table_mid <- gsub("\\s+$", "", table_mid)
+
+# Split the table_mid into lines
+table_lines <- strsplit(table_mid, "\\\\ ")
+
+# Add '\\\\' at the end of each line
+for (i in 1:length(table_lines)) {
+  table_lines[[i]] <- paste(table_lines[[i]], "\\", sep = "")
+}
+
+# Combine the lines back into a single string
+table_mid_fixed <- paste(table_lines, collapse = " \n")
+
+
+```
+
+
+
+
+```{r vh23_final_stat_table, results = 'asis'}
+#Uncomment when VH23 is ready
+
+
+header <- header <- "\\begin{table}[!htbp]\n\n           \\centering\n\n           \\caption{Descriptive Statistics of Core Variables (VH22, VH23 and Both Years)}\n\n           \\label{tab:combined_stats}\n\n           \\begin{tabular}{l|ccc|ccc|ccc}\n\n           \\hline \\hline\n\n           Variable & \\multicolumn{3}{c|}{Sample A (VH22)} & \\multicolumn{3}{c|}{Sample B (VH23)} & \\multicolumn{3}{c}{Panel (A-B)} \\\\\n\n           - & N & Mean & Std. Dev. & N & Mean & Std. Dev. & N & Mean & Std. Dev. \\\\\n\n           \\hline"
+
+
+footer <- "\n\\hline\n\n\\end{tabular}\n\n\\end{table}\n"
+
+
+# Concatenate the table_mid lines with appropriate spacing
+cat(header, table_mid_fixed, footer, "\n")
+```
+
+
+
+
+
+
