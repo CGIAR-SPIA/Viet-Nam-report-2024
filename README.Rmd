@@ -6,8 +6,8 @@ output:
     toc_depth: 2
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup, include=FALSE, results='hide'}
+knitr::opts_chunk$set(echo = FALSE)
 library (flextable)
 ```
 
@@ -23,7 +23,7 @@ ft <- flextable (df)
 
 ```
 
-ft
+`r ft`
 
 ## VHLSS variable dictionary:
 

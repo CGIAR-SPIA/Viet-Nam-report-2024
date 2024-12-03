@@ -12,14 +12,7 @@ README
 
 ## Summary:
 
-``` r
-df <- data.frame ("Script" = NA, 
-                  "Data source" = NA, 
-                  "Output" = NA)
-ft <- flextable (df)
-```
-
-ft
+<img src="README_files/figure-gfm/unnamed-chunk-3-1.png" width="492" />
 
 ## VHLSS variable dictionary:
 
