@@ -1,0 +1,64 @@
+﻿MATINH,Province_name,Region,CSMAP
+1,Thanh pho Ha Noi,1_RRD,1
+22,Tinh Quang Ninh,2_NMMA,
+26,Tinh Vinh Phuc,1_RRD,1
+27,Tinh Bac Ninh,1_RRD,1
+30,Tinh Hai Duong,1_RRD,1
+31,Thanh pho Hai Phong,1_RRD,1
+33,Tinh Hung Yen,1_RRD,1
+34,Tinh Thai Binh,1_RRD,1
+35,Tinh Ha Nam,1_RRD,1
+36,Tinh Nam Dinh,1_RRD,1
+37,Tinh Ninh Binh,1_RRD,1
+2,Tinh Ha Giang,2_NMMA,
+4,Tinh Cao Bang,2_NMMA,
+6,Tinh Bac Kan,2_NMMA,
+8,Tinh Tuyen Quang,2_NMMA,
+10,Tinh Lao Cai,2_NMMA,
+11,Tinh Dien Bien,2_NMMA,
+12,Tinh Lai Chau,2_NMMA,
+14,Tinh Son La,2_NMMA,
+15,Tinh Yen Bai,2_NMMA,
+17,Tinh Hoa Binh,2_NMMA,
+19,Tinh Thai Nguyen,2_NMMA,
+20,Tinh Lang Son,2_NMMA,
+24,Tinh Bac Giang,2_NMMA,1
+25,Tinh Phu Tho,2_NMMA,1
+38,Tinh Thanh Hoa,3_NCCCA,1
+40,Tinh Nghe An,3_NCCCA,1
+42,Tinh Ha Tinh,3_NCCCA,1
+44,Tinh Quang Binh,3_NCCCA,1
+45,Tinh Quang Tri,3_NCCCA,1
+46,Tinh Thua Thien Hue,3_NCCCA,1
+48,Thanh pho Da Nang,3_NCCCA,1
+49,Tinh Quang Nam,3_NCCCA,1
+51,Tinh Quang Ngai,3_NCCCA,1
+52,Tinh Binh Dinh,3_NCCCA,1
+54,Tinh Phu Yen,3_NCCCA,1
+56,Tinh Khanh Hoa,3_NCCCA,1
+58,Tinh Ninh Thuan,3_NCCCA,1
+60,Tinh Binh Thuan,3_NCCCA,1
+62,Tinh Kon Tum,4_Central Highlands,
+64,Tinh Gia Lai,4_Central Highlands,1
+66,Tinh Dak Lak,4_Central Highlands,1
+67,Tinh Dak Nong,4_Central Highlands,
+68,Tinh Lam Dong,4_Central Highlands,
+70,Tinh Binh Phuoc,5_South East,
+72,Tinh Tay Ninh,5_South East,
+74,Tinh Binh Duong,5_South East,
+75,Tinh Dong Nai,5_South East,
+77,Tinh Ba Ria Vung Tau,5_South East,
+79,Thanh pho Ho Chi Minh,5_South East,
+80,Tinh Long An,6_MRD,1
+82,Tinh Tien Giang,6_MRD,1
+83,Tinh Ben Tre,6_MRD,1
+84,Tinh Tra Vinh,6_MRD,1
+86,Tinh Vinh Long,6_MRD,1
+87,Tinh Dong Thap,6_MRD,1
+89,Tinh An Giang,6_MRD,1
+91,Tinh Kien Giang,6_MRD,1
+92,Thanh pho Can Tho,6_MRD,1
+93,Tinh Hau Giang,6_MRD,1
+94,Tinh Soc Trang,6_MRD,1
+95,Tinh Bac Lieu,6_MRD,1
+96,Tinh Ca Mau,6_MRD,1
