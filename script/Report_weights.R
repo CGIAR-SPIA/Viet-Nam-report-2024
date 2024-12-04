@@ -46,7 +46,7 @@ rm(list = ls()) #start clean
 # 1. Install and load packages ----
 # Function to check and install packages
 
-packages <- c("haven", "tidyverse", "readxl")
+packages <- c("haven", "tidyverse", "readxl", "stringr", "curl")
 
 check_and_install_package <- function(package_name) {
   if (!requireNamespace(package_name, quietly = TRUE)) {
@@ -61,7 +61,7 @@ library (haven)
 library (tidyverse)
 library (readxl)
 library (stringr)
-
+library (curl)
 
 # Function to format ID values
 
