@@ -87,7 +87,7 @@ widths <- c(2, 3, 5, 3, 3)
 
 ## 2.1. Structural changes ----
 
-### 2.1.1. Rice-growing hhs ---- 
+### 2.1.1. Rice-growing hhs ----
 
 str_change <- read_excel("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Weight/Ho_TBB01SR- ho trong lua 2020.xlsx",
                          sheet = "Sheet2") %>%
