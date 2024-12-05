@@ -41,12 +41,17 @@
 
 rm(list = ls()) #start clean
 
+getwd() #get current working directory
 
+setwd("YOUR_DESTINATION") #change working directory if needed
+
+
+token <- "YOUR_TOKEN" #paste your token here if needed. DELETE THIS LINE AFTER REPO IS PUBLIC
 
 # 1. Install and load packages ----
 # Function to check and install packages
 
-packages <- c("haven", "tidyverse", "readxl", "stringr", "curl")
+packages <- c("haven", "tidyverse", "readxl", "stringr", "curl", "httr")
 
 check_and_install_package <- function(package_name) {
   if (!requireNamespace(package_name, quietly = TRUE)) {
@@ -62,6 +67,7 @@ library (tidyverse)
 library (readxl)
 library (stringr)
 library (curl)
+library (httr)
 
 # Function to format ID values
 
@@ -82,16 +88,34 @@ format_ID <- function(df, columns, widths, pad_char = "0") {
 columns <- c("MATINH", "MAHUYEN", "MAXA", "MADIABAN", "HOSO")
 widths <- c(2, 3, 5, 3, 3)
 
+# Download data files from GitHub and save to your working directory----
+
+
+
+curl_function <- function (url)
+  {
+  url_pasted <- paste0 ("https://raw.githubusercontent.com/CGIAR-SPIA/Viet-Nam-report-2024/main/", url)
+  
+  # Ensure the directory exists before saving the file
+  dir_path <- dirname(url)  # Extract the directory path from the URL
+  if (!dir.exists(dir_path)) {
+    dir.create(dir_path, recursive = TRUE)  # Create the directory structure if it doesn't exist
+  }
+  
+  response <- GET(url_pasted, add_headers(Authorization = paste("token", token)))
+  writeBin(content(response, as = "raw"), url)
+}
 
 # 2. General calculations for both years  ----
 
 ## 2.1. Structural changes ----
 
 ### 2.1.1. Rice-growing hhs ----
+curl_function(url = "data/raw/Weight/structural_change.xlsx")
 
-str_change <- read_excel("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Weight/Ho_TBB01SR- ho trong lua 2020.xlsx",
-                         sheet = "Sheet2") %>%
+str_change <- read_excel("data/raw/Weight/structural_change.xlsx", sheet = "Sheet2") %>%
   select ("Number of rice growing households" : "2020")
+
 
 colnames (str_change) <- c ("province", "n_rice_2016", "n_rice_2020")
 
@@ -109,7 +133,7 @@ pred_n_rice_2023 <- n_rice_2020 * (1 + decline_rate_annual)^3 #Predicted 2023
 
 ### 2.1.2. Cassava DNA subsample ----
 
-str_change_cass <- read_excel("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Weight/Ho_TBB01SR- ho trong lua 2020.xlsx",
+str_change_cass <- read_excel("data/raw/Weight/structural_change.xlsx",
                               sheet = "Sheet3") %>%
   select (c("...1", "cassava_2016", "cassava_2020"))
 
@@ -124,11 +148,13 @@ pred_n_cass_2023 <- n_cass_2020 * (1 + decline_rate_annual_cass) ^ 3
 
 ### 2.1.3. Coffee ----
 
-n_coffee_pop <- read.csv ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Weight/Final/coffee_household_clean.csv") 
+curl_function(url = "data/raw/Weight/coffee_household_clean.csv")
+
+n_coffee_pop <- read.csv ("data/raw/Weight/coffee_household_clean.csv") 
 
 n_coffee_2016 <- sum(n_coffee_pop$n_coffee_hh)
 
-str_change_coffee <- read_excel("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Weight/Ho_TBB01SR- ho trong lua 2020.xlsx",
+str_change_coffee <- read_excel("data/raw/Weight/structural_change.xlsx",
                          sheet = "Sheet4") 
 
 n_coffee_2020 <- str_change_coffee$Coffee[1]
@@ -140,8 +166,9 @@ pred_n_coffee_2023 <- n_coffee_2020 * (1 + increase_rate_annual_coffee)^3
 ### 2.2. IN THE POPULATION----
 
 #### 2.2.1. Number of rice-growing households IN THE POPULATION----
+curl_function (url = "data/raw/Weight/rice_household_clean.csv")
 
-n_rice_pop <- read.csv ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Weight/Final/rice_household_clean.csv") %>%
+n_rice_pop <- read.csv ("data/raw/Weight/rice_household_clean.csv") %>%
   select (MATINH, MAXA, n_rice_hh) %>%
   rename (n_rice_pop = n_rice_hh) #merge by Commune ID (MAXA) because of some administrative change
 
@@ -149,8 +176,10 @@ n_rice_pop <- format_ID(n_rice_pop, columns = c("MATINH", "MAXA"), widths = c(2,
 
 
 #### 2.2.2. Number of general households IN THE POPULATION----
+curl_function (url = "data/raw/Weight/Census_household_communelevel_clean.csv")
 
-n_hh_pop <- read.csv ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Weight/Final/Census_household_communelevel_clean.csv") %>%
+
+n_hh_pop <- read.csv ("data/raw/Weight/Census_household_communelevel_clean.csv") %>%
   select (c(MATINH, MAXA, n_hh)) %>%
   rename (n_hh_pop = n_hh) 
 #merge by Commune ID (MAXA) because of some administrative change 
@@ -167,7 +196,9 @@ fraction_pop <- full_join (n_rice_pop, n_hh_pop) %>%
 
 ## 3.1. Load original weights 2023----
 
-wt_2023 <- read_dta ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS_Household_2023/weight2023.dta")
+curl_function(url = "data/raw/Weight/VHLSS_2023_weight.dta")
+
+wt_2023 <- read_dta ("data/raw/Weight/VHLSS_2023_weight.dta")
 
 colnames(wt_2023)[1:4] <- paste0 ("ma", colnames(wt_2023)[1:4]) 
 colnames(wt_2023)[1:4] <- toupper (colnames(wt_2023)[1:4])
@@ -183,7 +214,9 @@ wt_2023 <- format_ID(wt_2023, columns = c("MATINH", "MAXA", "MADIABAN"), widths 
 
 #### 3.2.1.1. Rice-growing households IN THE SAMPLE ----
 
-rice_gso <- read.csv ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS_Household_2023/Final/Muc4B11.csv") %>%
+curl_function(url = "data/raw/VHLSS_2023_Household/Final/Muc4B11.csv")
+
+rice_gso <- read.csv ("data/raw/VHLSS_2023_Household/Final/Muc4B11.csv") %>%
   select (c(MATINH, MAXA, MADIABAN, IDHO, HOSO, KYDIEUTRA, wt45)) %>%
   distinct ()
 
@@ -203,8 +236,9 @@ n_rice_sample <- rice_gso %>%
 
 
 #### 3.2.1.2. Number of general households IN THE SAMPLE ---- 
+curl_function (url = "data/raw/VHLSS_2023_Correlates/Ho_ThongTinHo.dta")
 
-ho_thongtinho <- read_dta ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VH23_Correlates/Ho_ThongTinHo.dta") %>%
+ho_thongtinho <- read_dta ("data/raw/VHLSS_2023_Correlates/Ho_ThongTinHo.dta") %>%
   select (c(idho:hoso))
 
 colnames(ho_thongtinho)[2:5] <- paste0 ("ma", colnames(ho_thongtinho)[2:5])
@@ -267,7 +301,9 @@ any(is.na(new_wt2023$weight_final_rice))  #no NA
 
 ## 4.1. Load original weights 2022----
 
-wt_2022 <- read_dta ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS_Household_2022/datasets/Weights/wt2022_SPIA.dta") %>%
+curl_function(url = "data/raw/VHLSS_2022_Household/datasets/Weights/wt2022_SPIA.dta")
+
+wt_2022 <- read_dta ("data/raw/VHLSS_2022_Household/datasets/Weights/wt2022_SPIA.dta") %>%
   select (c(tinh:diaban, ky, wt45)) %>%
   select (-huyen)
 
@@ -287,7 +323,9 @@ wt_2022 <- format_ID(wt_2022, columns = c("MATINH", "MAXA", "MADIABAN"), widths 
 
 #### 4.2.1.1. Rice-growing households IN THE SAMPLE ----
 
-rice_gso_22 <- read_dta ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS_Household_2022/datasets/Ho_Muc4B11.dta") %>%
+curl_function (url = "data/raw/VHLSS_2022_Household/datasets/Ho_Muc4B11.dta")
+
+rice_gso_22 <- read_dta ("data/raw/VHLSS_2022_Household/datasets/Ho_Muc4B11.dta") %>%
   select (c(MATINH, MAXA, MADIABAN, IDHO, KYDIEUTRA)) %>%
   distinct() 
 
@@ -312,7 +350,9 @@ n_rice_sample_22 <- rice_gso_22 %>%
 
 #### 4.2.1.2. Number of general households IN THE SAMPLE ---- 
 
-ho_thongtinho_22 <- read_dta ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VH22_Correlates/Ho_ThongTinHo.dta") %>%
+curl_function (url = "data/raw/VHLSS_2022_Correlates/Ho_ThongTinHo.dta")
+
+ho_thongtinho_22 <- read_dta ("data/raw/VHLSS_2022_Correlates/Ho_ThongTinHo.dta") %>%
   select (c(IDHO:HOSO))
 
 
@@ -378,7 +418,9 @@ final_weight_rice <- new_wt2022 %>%
 
 
 #Load rice DNA dataset:
-df_rice_dna <- read.csv ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Genetics/Rice/Rice.vars.VH24.csv") %>%
+curl_function (url = "data/processed/Rice.vars.VH24.csv")
+
+df_rice_dna <- read.csv ("data/processed/Rice.vars.VH24.csv") %>%
   select (c(MATINH, MAHUYEN, MAXA, MADIABAN, HOSO)) 
 
 
@@ -422,7 +464,7 @@ final_weight_rice <- final_weight_rice %>%
 
 
 
-rm(list = setdiff(ls(), c("final_weight_rice", "n_hh_sample", "n_hh_sample_22", "n_hh_pop", "wt_2023", "pred_n_cass_2023", 'format_ID', "pred_n_coffee_2023")))
+rm(list = setdiff(ls(), c("curl_function", "token", "final_weight_rice", "n_hh_sample", "n_hh_sample_22", "n_hh_pop", "wt_2023", "pred_n_cass_2023", 'format_ID', "pred_n_coffee_2023")))
 
 
 
@@ -433,7 +475,9 @@ rm(list = setdiff(ls(), c("final_weight_rice", "n_hh_sample", "n_hh_sample_22", 
 
 ### 5.1.1. In the sample ----
 
-cassava <- read.csv ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Genetics/Cassava/Cass.vars.VH24.csv") %>%
+curl_function (url = "data/processed/Cass.vars.VH24.csv")
+
+cassava <- read.csv ("data/processed/Cass.vars.VH24.csv") %>%
   select (c(MATINH, MAXA, MADIABAN, HOSO, IDHO)) 
 
 cassava <- format_ID(cassava, columns = c("MATINH", "MAXA", "MADIABAN", "HOSO"), widths = c(2,5,3,3))
@@ -451,8 +495,9 @@ fraction_sample_cass <- n_cass_sample %>%
 
 
 ### 5.1.2. In the population ----
+curl_function(url = "data/raw/Weight/cassava_household_clean.csv")
 
-n_cass_pop <- read.csv ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Weight/Final/cassava_household_clean.csv") %>%
+n_cass_pop <- read.csv ("data/raw/Weight/cassava_household_clean.csv") %>%
   select (c(MATINH, MAXA, n_cassava_hh))  #GSO list: N_cassava by commune, merge by Commune ID
 
 
@@ -502,8 +547,9 @@ cassava_final_weight <- cass_wt %>%
 
 
 # 6. GIFT-derived tilapia strains ----
+curl_function (url = "data/processed/GIFT.vars.VH24.csv")
 
-gift <- read.csv ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Genetics/Tilapia/GIFT.vars.VH24.csv") %>%
+gift <- read.csv ("data/processed/GIFT.vars.VH24.csv") %>%
   select (-hhiddistrict)
 
 gift[which(gift$I_Q5== "388893714"),]$HH_ID <- 1 #post-survey edit
@@ -522,7 +568,9 @@ gift <- gift %>%
 
 
 # GSO dataset to get EA ID:
-gift_ea <- read.csv ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS_Household_2023/Combined_modules/M4B51A.csv")%>%
+curl_function (url = "data/raw/VHLSS_2023_Household/Combined_modules/Ho_Muc4B51A.csv")
+
+gift_ea <- read.csv ("data/raw/VHLSS_2023_Household/Combined_modules/Ho_Muc4B51A.csv")%>%
   select ("MATINH":"MADIABAN") %>%
   select (-MAHUYEN)
 
@@ -549,19 +597,15 @@ gift_final <- gift_df %>%
 
 # 7. Coffee----
 ## 7.1.1. In the sample----
-coffee_q1 <- read_excel ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS_Household_2023/Q1.xlsx",
-                         sheet = "SPIA_M4B13A")
-coffee_q2 <- read_excel ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS_Household_2023/Q2.xlsx",
-                        sheet = "SPIA_M4B13A")
-coffee_q3 <- read_dta ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS_Household_2023/Q3/Ho_SPIA_M4B13A.dta")
+curl_function (url = "data/raw/VHLSS_2023_Household/Combined_modules/M4B13A.csv")
 
-coffee_q4 <- read_dta ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS_Household_2023/Q4/Ho_SPIA_M4B13A.dta")
+coffee <- read.csv("data/raw/VHLSS_2023_Household/Combined_modules/M4B13A.csv") %>%
+  select (c(MATINH, MAXA, MADIABAN, HOSO, IDHO)) 
 
+coffee <- format_ID (coffee, c("MATINH", "MAXA", "MADIABAN", "HOSO"), c(2,5,3,2))
+  
 
-coffee <- full_join (coffee_q1, coffee_q2) %>%
-  full_join (coffee_q3) %>%
-  full_join (coffee_q4) %>%
-  select (c(MATINH, MAXA, MADIABAN, HOSO, IDHO)) %>%
+coffee <- coffee %>%
   left_join (wt_2023) %>%
   select (-MAHUYEN)
 
@@ -578,7 +622,10 @@ fraction_sample_coffee <- n_coffee_sample %>%
 
 
 ## 7.1.2. In the population----
-n_coffee_pop <- read.csv ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Weight/Final/coffee_household_clean.csv") %>%
+curl_function (url = "data/raw/Weight/coffee_household_clean.csv")
+
+
+n_coffee_pop <- read.csv ("data/raw/Weight/coffee_household_clean.csv") %>%
   select (-c(ends_with("name"), MAHUYEN)) 
 
 n_coffee_pop <- format_ID (n_coffee_pop, columns = c("MATINH", "MAXA"), widths = c(2,5))
@@ -621,5 +668,12 @@ final_weight <- final_weight_rice %>%
   
 
 
-write.csv (final_weight, "C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/Report_weights.csv",
+# Save file:
+output_dir <- "Output"
+if (!dir.exists(output_dir)) {
+  dir.create(output_dir)  # Create the directory if it doesn't exist
+}
+
+
+write.csv (final_weight, "Output/Report_weights.csv",
            row.names = FALSE)
