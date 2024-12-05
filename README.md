@@ -1,4 +1,4 @@
-Step 1: 
+# General Instruction: 
 - Navigate to script file needed under the [script](script) folder. A [summary](#Summary) of each script file is listed below.
 - On the top right corner of the script file, click on the three-dot button, choose "Download" or Ctrl + Shift + S and save to your computer.
 - Run the downloaded script with R. Data sets are curled directly from the code, so you don't need to download data files manually. 
