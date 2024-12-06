@@ -10,12 +10,21 @@
 # socio-economics, at household and commune levels, and Report_weights.csv to generate the two datasets used for the report analysis
 # The script outputs are "VH22_data.csv", "VH22_data.dic" and "Desc.stats_VH22.html"
 
+
 rm(list = ls()) #start clean
+
+getwd() #get current working directory
+
+setwd("YOUR_DESTINATION") #change working directory if needed
+
+
+token <- "YOUR_TOKEN" #paste your token here if needed. DELETE THIS LINE AFTER REPO IS PUBLIC
 
 # Install and load packages ----
 # Function to check and install packages
 
-packages <- c("haven", "tidyverse", "this.path", "flextable", "plyr", "expss", "sjlabelled", "fastDummies", "Hmisc")
+packages <- c("haven", "tidyverse", "this.path", "flextable", "plyr", "expss", "sjlabelled", "fastDummies", 
+              "Hmisc", "summarytools", "httr")
 
 check_and_install_package <- function(package_name) {
   if (!requireNamespace(package_name, quietly = TRUE)) {
@@ -36,8 +45,23 @@ library (sjlabelled)
 library (fastDummies)
 library (Hmisc)
 library (summarytools)
+library (httr)
 
+# Download data files from GitHub and save to your working directory----
 
+curl_function <- function (url)
+{
+  url_pasted <- paste0 ("https://raw.githubusercontent.com/CGIAR-SPIA/Viet-Nam-report-2024/main/", url)
+  
+  # Ensure the directory exists before saving the file
+  dir_path <- dirname(url)  # Extract the directory path from the URL
+  if (!dir.exists(dir_path)) {
+    dir.create(dir_path, recursive = TRUE)  # Create the directory structure if it doesn't exist
+  }
+  
+  response <- GET(url_pasted, add_headers(Authorization = paste("token", token)))
+  writeBin(content(response, as = "raw"), url)
+}
 
 # Function to format IDs:
 format_ID <- function(df, columns, widths, pad_char = "0") {
@@ -59,7 +83,9 @@ widths <- c(2, 3, 5, 3, 3)
 
 
 # Breeding innovations ----
-breeding_rice <- read.csv ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Genetics/Rice/Rice.vars.VH24.csv") %>%
+curl_function("data/processed/Rice.vars.VH24.csv")
+
+breeding_rice <- read.csv ("data/processed/Rice.vars.VH24.csv") %>%
   select (-"X") %>%
   mutate (breeding_certified_seed = case_when (M4B113_C7 ==1 ~ 1,
                                                M4B113_C7 ==2 ~ 0,
