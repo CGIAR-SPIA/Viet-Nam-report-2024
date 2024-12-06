@@ -176,11 +176,10 @@ innov <- full_join (breeding_rice, mech_22) %>%
 
 
 # Weights ----
-curl_function("script/Report_weights.R")
+curl_function("Output/Report_weights.csv")
 
-source ("script/Report_weights.R")
 
-weight <- read.csv ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/Report_weights.csv") %>%
+weight <- read.csv ("Output/Report_weights.csv") %>%
   select (-c(weight_cass, weight_gift, weight_coffee)) 
 
 weight <- format_ID(weight, columns = c("MATINH", "MAXA", "MADIABAN"), c(2,5,3))
@@ -197,8 +196,9 @@ innov_weight$weight_rice_DNA[is.na(innov_weight$breeding_main_variety)] <- NA
 # VH22----
 
 # Household head's information: 
+curl_function ("data/raw/VHLSS_2022_Correlates/Ho_ThanhVien.dta")
 
-ho_thanhvien_22 <- read_dta ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VH22_Correlates/Ho_ThanhVien.dta") %>%
+ho_thanhvien_22 <- read_dta ("data/raw/VHLSS_2022_Correlates/Ho_ThanhVien.dta") %>%
   select(c(starts_with(c("MA", "IDHO")),  "HOSO", "M1A_C2", "M1A_C3", "M1A_C5", "M2_C1", "M1A_C10", "KYDIEUTRA")) %>%
   group_by(IDHO) %>%
   mutate (n_member = n()) %>%
@@ -228,7 +228,9 @@ summary(ho_thanhvien_22)
 
 
 # Household information (ethnic, income, expense): 
-ho_thongtinho_22 <- read_dta ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VH22_Correlates/Ho_ThongTinHo.dta") %>%
+curl_function ("data/raw/VHLSS_2022_Correlates/Ho_ThongTinHo.dta")
+
+ho_thongtinho_22 <- read_dta ("data/raw/VHLSS_2022_Correlates/Ho_ThongTinHo.dta") %>%
   select(c(starts_with(c("MA", "IDHO")), "HOSO", "DANTOCCHUHO", "THUNHAP", "TONGCHITIEU")) %>%
   select (-"MAHUYEN") %>%
   mutate (ethnic = case_when (DANTOCCHUHO == 1 ~ 0,
@@ -239,8 +241,8 @@ ho_thongtinho_22 <- read_dta ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPI
 
 
 
-
-ho_muc4b0_22 <- read_dta ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VH22_Correlates/ho_muc4b0.dta") %>%
+curl_function("data/raw/VHLSS_2022_Correlates/Ho_Muc4B0.dta")
+ho_muc4b0_22 <- read_dta ("data/raw/VHLSS_2022_Correlates/Ho_Muc4B0.dta") %>%
   rename(c("id_land" = "M4B0_MA",
            "land_area" = "M4B0_C3")) %>%
   pivot_wider(names_from = id_land,
@@ -279,8 +281,9 @@ hh_df_22$IDHO <- paste0(hh_df_22$MAXA, hh_df_22$MADIABAN, hh_df_22$HOSO)   #hh s
 
 
 # Commune 2022 ----
+curl_function ("data/raw/VHLSS_2022_Correlates/Xa_ThongTinXa.dta")
 
-xa_thongtinxa_22 <- read_dta ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VH22_Correlates/Xa_ThongTinXa.dta") %>%
+xa_thongtinxa_22 <- read_dta ("data/raw/VHLSS_2022_Correlates/Xa_ThongTinXa.dta") %>%
   rename (c("dist_main_str" = "M5C5", 
             "type_main_str" = "M5C7")) %>%
   mutate (poor_commune = case_when (M1C14 ==1 ~ 1,
@@ -295,8 +298,8 @@ xa_thongtinxa_22 <- read_dta ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPI
   select (-"MAHUYEN")
 
 
-
-xa_muc5a_22 <- read_dta ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VH22_Correlates/Xa_Muc5A.dta") %>%
+curl_function ("data/raw/VHLSS_2022_Correlates/Xa_Muc5A.dta")
+xa_muc5a_22 <- read_dta ("data/raw/VHLSS_2022_Correlates/Xa_Muc5A.dta") %>%
   rename (c("id_market" = "M5STT1",
             "dist_market" = "M5C25")) %>%
   mutate (dummy_local_market = case_when (M5C24 == 1 ~ 1,
@@ -312,8 +315,8 @@ xa_muc5a_22 <- read_dta ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 201
   select (-"MAHUYEN")
 
 
-
-xa_muc4c_22 <- read_dta ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VH22_Correlates/Xa_Muc4C.dta") %>%
+curl_function ("data/raw/VHLSS_2022_Correlates/Xa_Muc4C.dta")
+xa_muc4c_22 <- read_dta ("data/raw/VHLSS_2022_Correlates/Xa_Muc4C.dta") %>%
   rename (c("dist_ext_center" = "M4C27",
             "farmer_participation_pct" = "M4C29")) %>%
   select (-c(ends_with("GHIRO"), "M4C33", starts_with(c("M4C28", "M4C37")))) %>%
@@ -467,7 +470,7 @@ df_22 <- df_22%>%
 
 
 # Export dataset and dictionary of variables (VH22_data.dic)
-write_labelled_csv (df_22, filename = "C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/VH22_data.csv",
+write_labelled_csv (df_22, filename = "data/processed/VH22_data.csv",
                     single_file = FALSE)
 
 
@@ -486,4 +489,4 @@ VH22_summary <- df_22 %>%
             dist_ext_center, dummy_protection_staff, main_str_asphalt,
             Bottom_20, Bottom_40)) %>%
   dfSummary()
-view(VH22_summary, file = "C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/VH22_Desc.stats.html")
+view(VH22_summary, file = "Output/VH22_Desc.stats.html")
