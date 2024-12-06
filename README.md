@@ -4,9 +4,9 @@
 - Run the downloaded script with R. Data sets are curled directly from GitHub using the code, so you don't need to download data files manually. 
 
 # Summary
-Section | Subsection | Script | Output | Status | 
-|:-----:|:----------:|:------:|:------:| :-----:|
-|General|VH22 data|[VH22 data](script/VH22_data.R)|[VH22 dataset](data/processed/VH22_data.csv), [VH22 codebook](other/codebook%20for%20processed%20data/VH22_data.dic.csv)|complete|
-|General|VH23 data|[VH23 data](script/VH23_data.R)|[VH23 dataset](data/processed/VH23_data.csv), [VH23 codebook](other/codebook%20for%20processed%20data/VH23_data.dic.csv)|complete|
-|General|Weights|[Weight](https://github.com/CGIAR-SPIA/Viet-Nam-report-2024/blob/main/script/Report_weights.R)|[Weight](Output/Report_weights.csv)|complete|
+Section | Subsection | Description| Script | Output | Status (will be deleted when published) | 
+|:-----:|:----------:|:------:|:------:| :-----:|:-----:|
+|General|VH22 data|Prepare a combined dataset for all innovations|[VH22 data](script/VH22_data.R)|[VH22 dataset](data/processed/VH22_data.csv), [VH22 codebook](other/codebook%20for%20processed%20data/VH22_data.dic.csv)|complete|
+|General|VH23 data|Prepare a combined dataset for all innovations| [VH23 data](script/VH23_data.R)|[VH23 dataset](data/processed/VH23_data.csv), [VH23 codebook](other/codebook%20for%20processed%20data/VH23_data.dic.csv)|complete|
+|General|Weights|Adjust weight with structural change and underrepresentation|[Weight](https://github.com/CGIAR-SPIA/Viet-Nam-report-2024/blob/main/script/Report_weights.R)|[Weight](Output/Report_weights.csv)|complete|
 # Software Implementation
