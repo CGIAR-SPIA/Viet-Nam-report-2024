@@ -15,13 +15,19 @@
 # Distance to wholesale market (km),	Commune has wholesale market and 	Commune has extension agent
 
 
-
 rm(list = ls()) #start clean
+
+getwd() #get current working directory
+
+setwd("YOUR_DESTINATION") #change working directory if needed
+
+
+token <- "YOUR_TOKEN" #paste your token here if needed. DELETE THIS LINE AFTER REPO IS PUBLIC
 
 # Install and load packages ----
 # Function to check and install packages
 
-packages <- c("haven", "tidyverse", "flextable", "plyr", "expss", "sjlabelled", "fastDummies", "Hmisc")
+packages <- c("haven", "tidyverse", "flextable", "plyr", "expss", "sjlabelled", "fastDummies", "Hmisc", "httr")
 
 check_and_install_package <- function(package_name) {
   if (!requireNamespace(package_name, quietly = TRUE)) {
@@ -38,7 +44,7 @@ library (haven)
 library (fastDummies)
 library (expss)
 library (summarytools)
-
+library (httr)
 # Function to format IDs:
 format_ID <- function(df, columns, widths, pad_char = "0") {
   # Loop through each column and its corresponding width
@@ -52,6 +58,23 @@ format_ID <- function(df, columns, widths, pad_char = "0") {
   return(df)
 }
 
+# Download data files from GitHub and save to your working directory----
+
+curl_function <- function (url)
+{
+  url_pasted <- paste0 ("https://raw.githubusercontent.com/CGIAR-SPIA/Viet-Nam-report-2024/main/", url)
+  
+  # Ensure the directory exists before saving the file
+  dir_path <- dirname(url)  # Extract the directory path from the URL
+  if (!dir.exists(dir_path)) {
+    dir.create(dir_path, recursive = TRUE)  # Create the directory structure if it doesn't exist
+  }
+  
+  response <- GET(url_pasted, add_headers(Authorization = paste("token", token)))
+  writeBin(content(response, as = "raw"), url)
+}
+
+
 # Define columns and widths
 columns <- c("MATINH", "MAHUYEN", "MAXA", "MADIABAN", "HOSO")
 widths <- c(2, 3, 5, 3, 3)
@@ -59,7 +82,8 @@ widths <- c(2, 3, 5, 3, 3)
 
 
 # DNA cassava ----
-cassava <- read.csv ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Genetics/Cassava/Cass.vars.VH24.csv") %>%
+curl_function("data/processed/Cass.vars.VH24.csv")
+cassava <- read.csv ("data/processed/Cass.vars.VH24.csv") %>%
   select (c(MATINH, MAHUYEN, MAXA, MADIABAN, HOSO, IDHO, Genotype_rec:DMC, CIAT.related)) 
 
 
@@ -72,8 +96,9 @@ cassava$IDHO <- paste0 (cassava$MAXA, cassava$MADIABAN, cassava$HOSO)
 # Tilapia ----
 
 # GIFT DNA households:
+curl_function ("data/processed/GIFT.vars.VH24.csv")
 
-gift <- read.csv("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Genetics/Tilapia/GIFT.vars.VH24.csv") %>%
+gift <- read.csv("data/processed/GIFT.vars.VH24.csv") %>%
   select (c(hhidprovince:HH_ID, StrainB, KYDIEUTRA, Strain, Strain_present, I_Q5)) 
 
 gift[which(gift$I_Q5== "388893714"),]$HH_ID <- 1 #post-survey edit
@@ -92,8 +117,8 @@ gift <- format_ID (gift, columns = c("MATINH", "MAHUYEN", "MAXA", "HOSO"), width
 
 
 # GSO dataset to get EA ID:
-
-gift_ea <- read.csv ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS_Household_2023/Combined_modules/M4B51A.csv")%>%
+curl_function("data/raw/VHLSS_2023_Household/Combined_modules/Ho_Muc4B51A.csv")
+gift_ea <- read.csv ("data/raw/VHLSS_2023_Household/Combined_modules/Ho_Muc4B51A.csv")%>%
   select ("MATINH":"MADIABAN")
 
 gift_ea <- format_ID (gift_ea, columns = c("MATINH", "MAHUYEN", "MAXA", "MADIABAN"), widths = c(2,3,5,3)) #format ID
@@ -122,7 +147,9 @@ gift_final <- dummy_cols(gift_final, select_columns = "Strain") %>%
 
 
 # 1M5R----
-df_1m5r <- read.csv ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS_Household_2023/Final/1M5R_clean_Mar_2024/final_1m5r.csv") %>%
+curl_function("data/raw/VHLSS_2023_Household/Final/Final_1M5R/final_1m5r.csv")
+
+df_1m5r <- read.csv ("data/raw/VHLSS_2023_Household/Final/Final_1M5R/final_1m5r.csv") %>%
   mutate (lenient_1m = case_when (d_1m5r_certified == 1 | d_1m5r_certified_combined == 1 ~ 1,
                                   d_1m5r_certified != 1 & d_1m5r_certified_combined != 1 ~ 0,
                                   TRUE ~ NA),
@@ -169,7 +196,9 @@ df_1m5r$IDHO <- paste0(df_1m5r$MAXA,
 
 
 # Mechanization ----
-mech_23 <- read.csv ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS_Household_2023/Final/1M5R_clean_Mar_2024/mechanization_2023.csv") %>%
+curl_function("data/raw/VHLSS_2023_Household/Final/Final_1M5R/mechanization_2023.csv")
+
+mech_23 <- read.csv ("data/raw/VHLSS_2023_Household/Final/Final_1M5R/mechanization_2023.csv") %>%
   select (c("MATINH" : "IDHO", "M4B11A5_C3","M4B11A6_C21", "M4B11A6_C22", "M4B11A2_C1", "KYDIEUTRA")) %>%
   mutate (mech_laser_level = case_when (M4B11A5_C3 == 1 ~ 1,
                                         M4B11A5_C3 != 1 ~ 0,
@@ -204,8 +233,9 @@ mech_23 <- mech_23 %>%
 
 
 # Sustainable water use for coffee production ----
+curl_function ("data/processed/Coffee.vars.VH24.csv")
 
-coffee <- read.csv ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Non-genetics/Coffee.vars.VH24.csv")
+coffee <- read.csv ("data/processed/Coffee.vars.VH24.csv")
 
 coffee <- format_ID (coffee, columns = c("MATINH", "MAHUYEN", "MAXA", "MADIABAN", "HOSO"), width = c(2,3,5,3,3))
 coffee$IDHO <- paste0 (coffee$MAXA, coffee$MADIABAN, coffee$HOSO)
@@ -214,8 +244,9 @@ coffee <- coffee [, c(3:8,14,15)]
 
 
 # CSMAP----
+curl_function ("data/processed/CSMAPs.vars.22.23.csv")
 
-csmap <- read.csv ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Non-genetics/CSMAPs.vars.22.23.csv") %>%
+csmap <- read.csv ("data/processed/CSMAPs.vars.22.23.csv") %>%
   group_by (MATINH, MAHUYEN, MAXA, MADIABAN, HOSO, panel) %>%
   filter (panel == 2023) %>%
   summarise (mean_csmap = mean(CSMAP_reach, na.rm = TRUE)) %>%
@@ -246,8 +277,8 @@ table (innov$SWCP) # = +15 households?
 
 
 # Weights ----
-
-weight <- read.csv ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/Report_weights.csv") %>%
+curl_function ("Output/Report_weights.csv")
+weight <- read.csv ("Output/Report_weights.csv") %>%
   select (-c(weight_rice_DNA))
 
 weight <- format_ID(weight, columns = c("MATINH", "MAXA", "MADIABAN"), c(2,5,3))
@@ -262,8 +293,8 @@ innov_weight$weight_gift[is.na(innov_weight$StrainB_edited)] <- NA
 # Correlates ----
 
 # Household head's information: 
-
-ho_thanhvien <- read_dta ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VH23_Correlates/Ho_ThanhVien.dta") %>%
+curl_function ("data/raw/VHLSS_2023_Correlates/Ho_ThanhVien.dta")
+ho_thanhvien <- read_dta ("data/raw/VHLSS_2023_Correlates/Ho_ThanhVien.dta") %>%
   select(c(starts_with(c("MA")), "HOSO", "IDHO", "M1A_C2", "M1A_C3", "M1A_C5", "M2_C1", "M1A_C10")) %>%
   group_by(IDHO) %>%
   mutate (n_member = n()) %>%
@@ -293,7 +324,9 @@ ho_thanhvien$IDHO <- paste0 (ho_thanhvien$MAXA,
 
 
 # Household information (ethnic, income, expense): 
-ho_thongtinho <- read_dta ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VH23_Correlates/Ho_ThongTinHo.dta")
+curl_function ("data/raw/VHLSS_2023_Correlates/Ho_ThongTinHo.dta")
+
+ho_thongtinho <- read_dta ("data/raw/VHLSS_2023_Correlates/Ho_ThongTinHo.dta")
 
 ho_thongtinho <- ho_thongtinho %>%
   rename (c("IDHO" = "idho",
@@ -317,8 +350,8 @@ ho_thongtinho$IDHO <- paste0 (ho_thongtinho$MAXA,
                           ho_thongtinho$HOSO)
 
 # Land ownership:
-
-ho_muc4b0 <- read_dta ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VH23_Correlates/Ho_muc4b0.dta") %>%
+curl_function ("data/raw/VHLSS_2023_Correlates/Ho_muc4b0.dta")
+ho_muc4b0 <- read_dta ("data/raw/VHLSS_2023_Correlates/Ho_muc4b0.dta") %>%
   rename(c("id_land" = "m4b0_ma",
            "land_area" = "m4b0_c3")) %>%
   pivot_wider(names_from = id_land,
@@ -455,7 +488,7 @@ df_23 <- df_23 %>%
 
 
 # Export dataset and dictionary of variables (VH23_data.dic)
-write_labelled_csv (df_23, filename = "C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/VH23_data.csv",
+write_labelled_csv (df_23, filename = "Output/VH23_data.csv",
                     single_file = FALSE)
 
 
@@ -467,4 +500,4 @@ VH23_summary <- df_23 %>%
   select (c(THUNHAP, TONGCHITIEU, ethnic, Bottom_20, Bottom_40, age,
             edu_grade, n_member, female, internet, land_area_sum)) %>%
     dfSummary()
-view(VH23_summary, file = "C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/VH23_Desc.stats.html")
+view(VH23_summary, file = "Output/VH23_Desc.stats.html")
