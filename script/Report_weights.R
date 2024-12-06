@@ -46,7 +46,7 @@ getwd() #get current working directory
 # setwd("YOUR_DESTINATION") #change working directory if needed
 
 
-token <- "YOUR_TOKEN" #paste your token here if needed. DELETE THIS LINE AFTER REPO IS PUBLIC
+# token <- "YOUR_TOKEN" #paste your token here if needed. DELETE THIS LINE AFTER REPO IS PUBLIC
 
 # 1. Install and load packages ----
 # Function to check and install packages
