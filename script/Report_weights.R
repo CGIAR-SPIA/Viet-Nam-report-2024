@@ -40,9 +40,9 @@
 
 
 # rm(list = ls()) #start clean
-
-getwd() #get current working directory
-
+# 
+# getwd() #get current working directory
+# 
 # setwd("YOUR_DESTINATION") #change working directory if needed
 # 
 # 
