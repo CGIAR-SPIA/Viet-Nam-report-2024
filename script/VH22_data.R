@@ -105,8 +105,9 @@ breeding_rice$IRRI_Parentage_edited <- ifelse (breeding_rice$IRRI_Parentage %in%
 
 
 # Mechanization and straw management ----
+curl_function ("data/raw/VHLSS_2023_Household/Final/Final_1M5R/mechanization_2022.csv")
 
-mech_22 <- read.csv ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS_Household_2023/Final/1M5R_clean_Mar_2024/mechanization_2022.csv") %>%
+mech_22 <- read.csv ("data/raw/VHLSS_2023_Household/Final/Final_1M5R/mechanization_2022.csv") %>%
   select (c("IDHO" : "KYDIEUTRA", "M4B111_C122", "M4B111_C123", "M4B111_C124", "M4B111_C6", "M4B111_C13", "M4B111_C14")) %>%
   mutate (mech_mini_combiner = case_when (M4B111_C122 == 1 ~ 1,
                                           M4B111_C122 == 2 ~ 0,
@@ -150,7 +151,8 @@ mech_22$IDHO <- paste0(mech_22$MAXA,
                        mech_22$HOSO)
 
 # CSMAP ----
-csmap <- read.csv ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Non-genetics/CSMAPs.vars.22.23.csv") %>%
+curl_function("data/processed/CSMAPs.vars.22.23.csv")
+csmap <- read.csv ("data/processed/CSMAPs.vars.22.23.csv") %>%
   group_by (MATINH, MAHUYEN, MAXA, MADIABAN, HOSO, panel) %>%
   filter (panel == 2022) %>%
   summarise (mean_csmap = mean(CSMAP_reach, na.rm = TRUE)) %>%
@@ -174,6 +176,9 @@ innov <- full_join (breeding_rice, mech_22) %>%
 
 
 # Weights ----
+curl_function("script/Report_weights.R")
+
+source ("script/Report_weights.R")
 
 weight <- read.csv ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/Report_weights.csv") %>%
   select (-c(weight_cass, weight_gift, weight_coffee)) 

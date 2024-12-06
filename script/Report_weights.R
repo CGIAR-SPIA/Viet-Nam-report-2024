@@ -39,11 +39,11 @@
 
 
 
-rm(list = ls()) #start clean
+# rm(list = ls()) #start clean
 
 getwd() #get current working directory
 
-setwd("YOUR_DESTINATION") #change working directory if needed
+# setwd("YOUR_DESTINATION") #change working directory if needed
 
 
 token <- "YOUR_TOKEN" #paste your token here if needed. DELETE THIS LINE AFTER REPO IS PUBLIC
@@ -69,6 +69,23 @@ library (stringr)
 library (curl)
 library (httr)
 
+# Download data files from GitHub and save to your working directory----
+
+curl_function <- function (url)
+{
+  url_pasted <- paste0 ("https://raw.githubusercontent.com/CGIAR-SPIA/Viet-Nam-report-2024/main/", url)
+  
+  # Ensure the directory exists before saving the file
+  dir_path <- dirname(url)  # Extract the directory path from the URL
+  if (!dir.exists(dir_path)) {
+    dir.create(dir_path, recursive = TRUE)  # Create the directory structure if it doesn't exist
+  }
+  
+  response <- GET(url_pasted, add_headers(Authorization = paste("token", token)))
+  writeBin(content(response, as = "raw"), url)
+}
+
+
 # Function to format ID values
 
 format_ID <- function(df, columns, widths, pad_char = "0") {
@@ -88,23 +105,9 @@ format_ID <- function(df, columns, widths, pad_char = "0") {
 columns <- c("MATINH", "MAHUYEN", "MAXA", "MADIABAN", "HOSO")
 widths <- c(2, 3, 5, 3, 3)
 
-# Download data files from GitHub and save to your working directory----
 
 
 
-curl_function <- function (url)
-  {
-  url_pasted <- paste0 ("https://raw.githubusercontent.com/CGIAR-SPIA/Viet-Nam-report-2024/main/", url)
-  
-  # Ensure the directory exists before saving the file
-  dir_path <- dirname(url)  # Extract the directory path from the URL
-  if (!dir.exists(dir_path)) {
-    dir.create(dir_path, recursive = TRUE)  # Create the directory structure if it doesn't exist
-  }
-  
-  response <- GET(url_pasted, add_headers(Authorization = paste("token", token)))
-  writeBin(content(response, as = "raw"), url)
-}
 
 # 2. General calculations for both years  ----
 
