@@ -12,7 +12,7 @@ rm (list = ls())
 # Function to check and install packages
 
 packages <- c("foreign", "tidyr", "readxl", "ggplot2", "dplyr", "stringr", "networkD3", "sf", "tidyverse", "haven",
-              "readr", "curl", "httr", "jsonlite", "reshape", "reshape2", "stringer")
+              "readr", "curl", "httr", "jsonlite", "reshape", "reshape2", "stringr", "gridExtra")
 
 check_and_install_package <- function(package_name) {
   if (!requireNamespace(package_name, quietly = TRUE)) {
@@ -39,7 +39,8 @@ library (httr)
 library (jsonlite)
 library (reshape)
 library (reshape2)
-library (stringer)
+library (stringr)
+library (gridExtra)
 
 
 # Function to format ID values
