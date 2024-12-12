@@ -63,6 +63,25 @@ columns <- c("MATINH", "MAHUYEN", "MAXA", "MADIABAN", "HOSO")
 widths <- c(2, 3, 5, 3, 3)
 
 
+# Download data files from GitHub and save to your working directory----
+
+
+
+curl_function <- function (url)
+{
+  url_pasted <- paste0 ("https://raw.githubusercontent.com/CGIAR-SPIA/Viet-Nam-report-2024/main/", url)
+  
+  # Ensure the directory exists before saving the file
+  dir_path <- dirname(url)  # Extract the directory path from the URL
+  if (!dir.exists(dir_path)) {
+    dir.create(dir_path, recursive = TRUE)  # Create the directory structure if it doesn't exist
+  }
+  
+  response <- GET(url_pasted, add_headers(Authorization = paste("token", token)))
+  writeBin(content(response, as = "raw"), url)
+}
+
+
 
 
 # Prepare layering map----
@@ -117,8 +136,11 @@ ggplot(data, aes(x = Year, y = Values)) +
 # Figure 2. Tilapia aquaculture production in Viet Nam (in thousand tonnes), 2013- 2023 ----
 # Figure 4. Map of Sampled Tilapia Households and Hatcheries in 2023 ----
 
-HH <- read.csv ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Genetics/Tilapia/HouseholdModule_WIDE.csv")
-Ha <- read.csv ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Genetics/Tilapia/HatcheriesModule_WIDE.csv")
+curl_function ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE.csv")
+HH <- read.csv ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE.csv")
+
+curl_function ("data/raw/Genetics/Tilapia/HatcheriesModule_WIDE.csv")
+Ha <- read.csv ("data/raw/Genetics/Tilapia/HatcheriesModule_WIDE.csv")
 
 Ha <- Ha [complete.cases(Ha$S_Q1.Longitude_1, Ha$S_Q1.Latitude_1), ] # 98/101
 HH <- HH [complete.cases(HH$S_Q1.Longitude_1, HH$S_Q1.Latitude_1), ] # 215/231
@@ -140,68 +162,17 @@ ggplot() +
   theme(plot.title = element_text(hjust = 0.5)) 
 
 
-# HH <- read.csv ("C:/Users/FKosmowski/OneDrive - CGIAR/DocumentsRedirected/2023 Activities/D. GIFT Experiment/Data/Final datasets/HouseholdModule_WIDE.csv")
-# Ha <- read.csv ("C:/Users/FKosmowski/OneDrive - CGIAR/DocumentsRedirected/2023 Activities/D. GIFT Experiment/Data/Final datasets/HatcheriesModule_WIDE.csv")
-# 
-# map <- st_read("/vsicurl/https://raw.githubusercontent.com/CGIAR-SPIA/Vietnam-pre-report-2023/main/datasets/Shape_file/Shape_file/Province_with_Islands.shp")
-# IDProv <- read.csv(curl("https://raw.githubusercontent.com/CGIAR-SPIA/Vietnam-pre-report-2023/main/datasets/Provinces_IDs.csv"))
-# names(IDProv)[1] = "MATINH"
-
-# map$MATINH <- 0
-# map$Region <- ""
-# t <- rep(NA,65)
-# for (i in 1:length(map$ADM1_EN)) {
-#   t[[i]] <- ifelse(grep(gsub('( -)','',gsub('( city)','',map$ADM1_EN[[i]])),
-#                         IDProv$Province_name) %>% length()==0,0,
-#                    grep(gsub('( -)','',gsub('( city)','',map$ADM1_EN[[i]])),
-#                         IDProv$Province_name))
-#   map$MATINH[[i]] <- ifelse(t[[i]]==0,NA,IDProv$MATINH[[t[[i]]]])
-#   map$Region[[i]] <- ifelse(t[[i]]==0,NA,IDProv$Region[[t[[i]]]])}
-# map %>% head() %>% print(width = 120) %>% colnames()
-# TS <- map %>% filter(ADM1_VI=="Truong Sa") %>% st_geometry()
-# cnTS = st_centroid(TS)
-# TS_m = (TS-cnTS) * .25 + cnTS + c(-5,0)
-# HS <- map %>% filter(ADM1_VI=="Hoang Sa") %>% st_geometry()
-# cnHS = st_centroid(HS)
-# HS_m =  (HS-cnHS) *.25 + cnHS + c(-2.5,0)
-# modified_map <- map %>% filter(!(ADM1_VI %in% c("Truong Sa","Hoang Sa")))
-# 
-# crs <- st_crs(modified_map)
-# TS_map <- map %>% filter(ADM1_VI=="Truong Sa") %>% st_set_geometry(TS_m) %>% st_set_crs(crs)
-# HS_map <- map %>% filter(ADM1_VI=="Hoang Sa") %>% st_set_geometry(HS_m) %>% st_set_crs(crs)
-# modified_map <- rbind(modified_map,TS_map,HS_map)
-# rm(TS,TS_m,TS_map,HS,HS_m,HS_map,cnHS,cnTS,crs)
-
-
-
-# # Map. Collected samples 
-# Ha <- Ha [complete.cases(Ha$S_Q1.Longitude_1, Ha$S_Q1.Latitude_1), ] # 98/101
-# HH <- HH [complete.cases(HH$S_Q1.Longitude_1, HH$S_Q1.Latitude_1), ] # 215/231
-# 
-# Ha_sf <- st_as_sf(data.frame(longitude = Ha$S_Q1.Longitude_1, latitude = Ha$S_Q1.Latitude_1), coords = c("longitude", "latitude"))
-# HH_sf <- st_as_sf(data.frame(longitude = HH$S_Q1.Longitude_1, latitude = HH$S_Q1.Latitude_1), coords = c("longitude", "latitude"))
-
-# st_crs(Ha_sf) <- st_crs(HH_sf) <- st_crs(modified_map) <- st_crs("+proj=longlat")
-
-# ggplot() +
-#   geom_sf(data = modified_map, fill = "white", color = "black") +
-#   geom_sf(data = Ha_sf, aes(color = "Hatcheries")) +
-#   geom_sf(data = HH_sf, aes(color = "Households")) +
-#   scale_color_manual(values = c("Households" = "limegreen", "Hatcheries" = "blue"),
-#                      name = "Sampled Locations",
-#                      labels = c("Hatcheries", "Households")) +
-#   theme(plot.title = element_text(hjust = 0.5),
-#         legend.position = "right",
-#         legend.box.margin = margin(5, 5, 5, 5))
 
 
 
 # Table 2. Characteristics of tilapia-farming households in Vietnam ----
 
-HH <- read.csv ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Genetics/Tilapia/HouseholdModule_WIDE.csv")
+curl_function ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE.csv")
+HH <- read.csv ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE.csv")
 
 # Load GIFT DNA data:
-GIFT <- read.csv("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Genetics/Tilapia/GIFT.vars.VH24.csv") %>%
+curl_function("data/processed/GIFT.vars.VH24.csv")
+GIFT <- read.csv("data/processed/GIFT.vars.VH24.csv") %>%
   select (c(hhidprovince:HH_ID, StrainB, KYDIEUTRA, Strain, Strain_present, I_Q5)) 
 
 # POst-survey edits (incorrect IDs)
@@ -238,16 +209,16 @@ HH <- merge (HH [, -c(7:10)], GIFT , by='I_Q5', all.y=TRUE) # HH data is now n=2
 
 
 
-# Works well from here
-
 
 # Data 2; VHLSS survey (HH that could not be surveyed in DEPOCEN-SPIA survey taken out, from 250 to 204 households)
-Ho_Muc4B51A <- read.csv ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS_Household_2023/Combined_modules/Ho_Muc4B51A.csv")
-Ho_Muc4B51A_CS <- read.csv ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS_Household_2023/Combined_modules/Ho_Muc4B51A_CS.csv")
-
+curl_function("data/raw/VHLSS_2023_Household/Combined_modules/Ho_Muc4B51A.csv")
+Ho_Muc4B51A <- read.csv ("data/raw/VHLSS_2023_Household/Combined_modules/Ho_Muc4B51A.csv")
 Ho_Muc4B51A <- format_ID (Ho_Muc4B51A, columns = c("MATINH", "MAHUYEN", "MAXA", "HOSO", "MADIABAN"), widths = c(2,3,5,3,2)) 
 Ho_Muc4B51A$HOSO <- str_pad(Ho_Muc4B51A$HOSO, width = 3, pad = 0)
 
+
+curl_function ("data/raw/VHLSS_2023_Household/Combined_modules/Ho_Muc4B51A_CS.csv")
+Ho_Muc4B51A_CS <- read.csv ("data/raw/VHLSS_2023_Household/Combined_modules/Ho_Muc4B51A_CS.csv")
 Ho_Muc4B51A_CS <- format_ID (Ho_Muc4B51A_CS, columns = c("MATINH", "MAHUYEN", "MAXA", "HOSO", "MADIABAN"), widths = c(2,3,5,3,2)) 
 Ho_Muc4B51A$ID <- paste (Ho_Muc4B51A$MATINH, Ho_Muc4B51A$MAHUYEN, Ho_Muc4B51A$IDHO, sep='-')
 
@@ -265,7 +236,8 @@ Ho_Muc4B51A_CS <- Ho_Muc4B51A_CS[!duplicated(Ho_Muc4B51A_CS$ID), ]
 Ho_Muc4B51A_CS_filt <- merge (Ho_Muc4B51A_CS [, -c(2:5,7,8)], HH, by = 'ID', all.y=TRUE)
 
 # Add wt45 weights
-wt_2023 <- read_dta ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS_Household_2023/weight2023.dta")
+curl_function ("data/raw/Weight/VHLSS_2023_weight.dta")
+wt_2023 <- read_dta ("data/raw/Weight/VHLSS_2023_weight.dta")
 
 wt_2023 <- format_ID (wt_2023, columns = c("tinh", "huyen", "xa", "diaban"), widths = c(2,3,5,2)) 
 wt_2023$ID2 <- paste (wt_2023$tinh, wt_2023$huyen, wt_2023$xa, wt_2023$diaban, sep='-')
@@ -441,7 +413,7 @@ summary_table <- data.frame(
 
 summary_table
 
-write.csv(summary_table, "C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/Tab10.csv", row.names = FALSE)
+write.csv(summary_table, "Output/Tab10.csv", row.names = FALSE)
 
 
 
