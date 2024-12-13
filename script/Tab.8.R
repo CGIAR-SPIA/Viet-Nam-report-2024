@@ -17,7 +17,7 @@ rm (list = ls()) #start clean
 # Install and load packages ----
 # Function to check and install packages
 
-packages <- c("tidyverse", "rio", "readxl", "haven", "dplyr", "fastDummies", "flextable", "officer", "plyr")
+packages <- c("tidyverse", "rio", "readxl", "haven", "dplyr", "fastDummies", "flextable", "officer", "plyr", "httr")
 
 check_and_install_package <- function(package_name) {
   if (!requireNamespace(package_name, quietly = TRUE)) {
@@ -35,7 +35,7 @@ library (flextable)
 library (officer)
 library (haven)
 library (readxl)
-
+library (httr)
 
 # Function to format ID values
 
@@ -58,17 +58,37 @@ widths <- c(2, 3, 5, 3, 3)
 
 
 
-# Load data----
 
-df_22 <- read.csv ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/VH22_data.csv")
+# Curl data from GitHub ----
+curl_function <- function (url)
+{
+  url_pasted <- paste0 ("https://raw.githubusercontent.com/CGIAR-SPIA/Viet-Nam-report-2024/main/", url)
+  
+  # Ensure the directory exists before saving the file
+  dir_path <- dirname(url)  # Extract the directory path from the URL
+  if (!dir.exists(dir_path)) {
+    dir.create(dir_path, recursive = TRUE)  # Create the directory structure if it doesn't exist
+  }
+  
+  response <- GET(url_pasted, add_headers(Authorization = paste("token", token)))
+  writeBin(content(response, as = "raw"), url)
+}
+
+
+# Load data----
+curl_function ("data/processed/VH22_data.csv")
+df_22 <- read.csv ("data/processed/VH22_data.csv")
 df_22 <- format_ID(df_22, columns = c("MATINH", "MAHUYEN", "MAXA", "MADIABAN", "HOSO"), widths = c(2, 3, 5, 3, 3) )
 df_22$IDHO <- paste0 (df_22$MAXA, df_22$MADIABAN, df_22$HOSO)
 
 
 
-df_23 <- read.csv ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/VH23_data.csv")
+
+curl_function ("data/processed/VH23_data.csv")
+df_23 <- read.csv ("data/processed/VH23_data.csv")
 df_23 <- format_ID(df_23, columns = c("MATINH", "MAHUYEN", "MAXA", "MADIABAN", "HOSO"), widths = c(2, 3, 5, 3, 3) )
 df_23$IDHO <- paste0 (df_23$MAXA, df_23$MADIABAN, df_23$HOSO)
+
 
 df_23 <- df_23 %>%
   rename ("mech_row_seeder" = "mech_row_drum_seeder")
@@ -78,25 +98,21 @@ df <- full_join (df_22, df_23)
 
 
 # PFES data:
-pfes1 <- read_dta ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS Community_2024/Q1/SPIA_ThongTinXa.dta") %>%
-  select (c(MATINH, MAHUYEN, MAXA, M43_C1))
-
-pfes2 <- read_dta ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS Community_2024/Q2/SPIA_ThongTinXa.dta") %>%
-  select (c(MATINH, MAHUYEN, MAXA, M43_C1))
-
-pfes3 <- read_dta ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS Community_2024/Q3/SPIA_ThongTinXa.dta") %>%
+curl_function ("data/raw/VHLSS_2024_Commune/SPIA_ThongTinXa_Q1-3.csv")
+pfes <- read.csv ("data/raw/VHLSS_2024_Commune/SPIA_ThongTinXa_Q1-3.csv") %>%
   select (c(MATINH, MAHUYEN, MAXA, M43_C1))
 
 
-pfes <- full_join (pfes1, pfes2) %>%
-  full_join (pfes3) %>%
+pfes <- pfes %>%
   mutate (pfes_dummy = case_when (M43_C1 == 1 ~ 1,
                                   TRUE ~ 0)) %>%
   select (-M43_C1) %>%
   mutate (panel = 2024)
+pfes <- format_ID(pfes, columns = c("MATINH", "MAHUYEN", "MAXA"), widths = c(2,3,5))
 
 
-n_hh_pop <- read.csv ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Weight/Final/Census_household_communelevel_clean.csv") %>%
+curl_function ("data/raw/Weight/Census_household_communelevel_clean.csv")
+n_hh_pop <- read.csv ("data/raw/Weight/Census_household_communelevel_clean.csv") %>%
   select (c(MATINH, MAXA, n_hh)) %>%
   rename (n_hh_pop = n_hh) 
 #merge by Commune ID (MAXA) because of some administrative change 
@@ -116,7 +132,8 @@ df <- df%>%
 
 
 # Categorize provinces into region
-prov <- read.csv ("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS_Household_2022/datasets/Provinces_IDs.csv") %>%
+curl_function ("data/raw/VHLSS_2022_Household/datasets/Provinces_IDs.csv")
+prov <- read.csv ("data/raw/VHLSS_2022_Household/datasets/Provinces_IDs.csv") %>%
   select (c(MATINH, Region, Province_name)) 
 prov <- format_ID (prov, c("MATINH"), c(2))
 df <- df %>%
@@ -493,19 +510,19 @@ result <- tab_combine %>%
 # Print Table 8----
 
 var_name <- c(
-  "Genetically Improved Farmed Tilapia (GIFT) derived strains",
-  "Improved cassava varieties",
-  "CMD-resistant cassava varieties",
+  "Genetically Improved Farmed Tilapia (GIFT)-derived strains",
+  "CGIAR-related Cassava Varieties",
+  "Cassava Mosaic Disease (CMD)-resistant Cassava Varieties",
   "High-starch cassava varieties (DM QTL)",
-  "Improved rice varieties",
-  "Salt-tolerant rice varieties (STRVs)",
-  "Submergence-tolerant rice varieties",
+  "CGIAR-related Rice Varieties",
+  "Salt-tolerant Rice Varieties (STRVs)",
+  "Submergence-tolerant Rice Varieties",
   "Climate-Smart Mapping and Adaptation Planning (CS-MAP)",
   "Payment for Forest Environmental Services (PFES)",
-  "Laser Land Levelling",
-  "Combine Harvester",
-  "Mini-Combine Harvester",
-  "Straw Baler", 
+  "Laser Land Levelling (LLL)",
+  "Combine Harvester (CHB)",
+  "Mini-Combine Harvester (MCHB)",
+  "Rice Straw Baler", 
   "Household used seed blower",
   "Lenient 1M (Households combined certified seeds and own seeds)",
   "Strict 1M (Households used totally certified seeds)", 
@@ -515,13 +532,13 @@ var_name <- c(
   "Strict 2R (Maximum 100kg/ha of Nitrogen and minimum 3 applications)",
   "Lenient 3R (Maximum 6 applications and not within 20 days before harvest)",
   "Strict 3R (Maximum 3 applications of chemicals, not within 40 days after sowing, not after flowering)",
-  "3 Reductions 3 Gains (3R3G) and 1 Must do, 5 Reductions (1M5R)",
+  "Three Reductions, Three Gains (3R3G) and One Must Do, Five Reductions (1M5R)",
   "Strict 3R3G (Households adopted all the three reductions, using strict criteria)",
   "Alternate Wetting and Drying (AWD)",
   "At least 2 dry-downs, all between reproductive stage, each enduring at least 5 days",
   "Households used removed straws to feed for livestock",
   "Drum Seeder",
-  "Off-field Straw Management practices",
+  "Off-field Straw Management Practices",
   "Households used removed straws for compost", 
   "Sustainable Water Use for Coffee Production"
 )
@@ -593,12 +610,12 @@ print(ft)
 
 
 save_as_html (ft,
-              path = "C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/Tab8.html",
+              path = "Output/Tab8.html",
               page_size(orient = "landscape"))
 
 
 save_as_docx(ft, 
-             path = "C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/Tab8.docx",
+             path = "Output/Tab8.docx",
              pr_section = prop_section(page_size = page_size(orient = "landscape")))
 
 
