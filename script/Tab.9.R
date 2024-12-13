@@ -31,7 +31,8 @@ if (length(loaded_packages) > 0) {
 
 
 packages <- c("rvest", "iai", "jtools", "tidyverse", "officer",
-              "dplyr", "summarytools", "broom", "dplyr", "estimatr", "ggplot2", "curl", "patchwork", "flextable")
+              "dplyr", "summarytools", "broom", "dplyr", "estimatr", 
+              "ggplot2", "curl", "patchwork", "flextable", "httr")
 
 check_and_install_package <- function(package_name) {
   if (!requireNamespace(package_name, quietly = TRUE)) {
@@ -58,14 +59,45 @@ library (curl)
 library(patchwork)
 library (flextable)
 library (officer)
+library (httr)
+
+
+# Function to curl data from GitHub----
+curl_function <- function (url)
+{
+  url_pasted <- paste0 ("https://raw.githubusercontent.com/CGIAR-SPIA/Viet-Nam-report-2024/main/", url)
+  
+  # Ensure the directory exists before saving the file
+  dir_path <- dirname(url)  # Extract the directory path from the URL
+  if (!dir.exists(dir_path)) {
+    dir.create(dir_path, recursive = TRUE)  # Create the directory structure if it doesn't exist
+  }
+  
+  response <- GET(url_pasted, add_headers(Authorization = paste("token", token)))
+  writeBin(content(response, as = "raw"), url)
+}
+
+
+# Create output folders----
+
+output_dir <- "Output/Multivariate_analysis"
+
+# Check if the directory exists, if not, create it
+if (!dir.exists(output_dir)) {
+  dir.create(output_dir, recursive = TRUE)
+}
+
+
 
 # Load and prepare data ----
 # Province ID: 
-Provinces_IDs <- read.csv(curl("https://raw.githubusercontent.com/CGIAR-SPIA/Vietnam-pre-report-2023/main/datasets/Provinces_IDs.csv")) 
+curl_function ("data/raw/VHLSS_2022_Household/datasets/Provinces_IDs.csv")
+Provinces_IDs <- read.csv("data/raw/VHLSS_2022_Household/datasets/Provinces_IDs.csv") 
 Provinces_IDs$MATINH <- as.numeric (Provinces_IDs$MATINH)
 
 # VH22: 
-df_22 <- read.csv("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/VH22_data.csv")
+curl_function ("data/processed/VH22_data.csv")
+df_22 <- read.csv("data/processed/VH22_data.csv")
 df_22$MATINH <- as.numeric (df_22$MATINH)
 df_22 <- df_22 %>%
   left_join (Provinces_IDs)
@@ -84,12 +116,12 @@ thunhap_99 <- quantile(df_22$THUNHAP_mil, 0.99, na.rm = TRUE)
 land_area_sum_99 <- quantile(df_22$land_area_ha, 0.99, na.rm = TRUE)
 df_22$THUNHAP_mil <- ifelse(df_22$THUNHAP_mil > thunhap_99, NA, df_22$THUNHAP_mil)
 df_22$land_area_ha <- ifelse(df_22$land_area_ha > land_area_sum_99, NA, df_22$land_area_ha)
-
 df_22$EA_ID <- paste (df_22$MATINH, df_22$MAHUYEN, df_22$MAXA, df_22$MADIABAN, sep='-')
 
 
 #VH23:
-df_23 <- read.csv("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/VH23_data.csv")
+curl_function ("data/processed/VH23_data.csv")
+df_23 <- read.csv("data/processed/VH23_data.csv")
 df_23$MATINH <- as.numeric (df_23$MATINH)
 
 df_23 <- df_23 %>%
@@ -195,32 +227,30 @@ cluster_fn <- function (dataset, dependent_set, corr_list, fixed_effect = TRUE){
   # Rename Innovations
   result <- result %>%
     mutate(dependent_var = case_when(
-      dependent_var == 'IRRI_Parentage_edited' ~ 'Improved rice varieties',
-      dependent_var == 'mech_mini_combiner' ~ 'Mini-combine Harvester',
-      dependent_var == 'mech_combine_harvester' ~ 'Combine Harvester',
-      dependent_var == 'mech_straw_baler' ~ 'Straw Baler',
+      dependent_var == 'IRRI_Parentage_edited' ~ "CGIAR-related Rice Varieties",
+      dependent_var == 'mech_mini_combiner' ~ "Mini-Combine Harvester (MCHB)",
+      dependent_var == 'mech_combine_harvester' ~ "Combine Harvester (CHB)",
+      dependent_var == 'mech_straw_baler' ~ "Rice Straw Baler", 
       dependent_var == 'mech_row_seeder' ~ 'Row Seeder',
-      dependent_var == 'Saltol' ~ 'Salt-tolerant rice',
-      dependent_var == "CIAT.related" ~ "Improved cassava varieties",
+      dependent_var == "mech_row_drum_seeder" ~ "Row Seeder",
+      dependent_var == 'Saltol' ~ "Salt-tolerant Rice Varieties (STRVs)",
+      dependent_var == "CIAT.related" ~ "CGIAR-related Cassava Varieties",
       dependent_var == "DMC" ~ "Cassava DMC QTL", 
-      dependent_var == "CMD" ~ "CMD-resistant cassava QTL", 
+      dependent_var == "CMD" ~ "Cassava Mosaic Disease (CMD)-resistant Cassava Varieties",
       dependent_var == "SWCP" ~ "Sustainable Water for Coffee Production", 
-      dependent_var == "mech_combine_harvester" ~ "Combine Harvester",
-      dependent_var == "mech_row_drum_seeder" ~ "Row seeder",
       dependent_var == "d_1m5r_seed_100kg" ~ "1R: Seed rate (strict)", 
       dependent_var == "mech_seed_blower" ~ "Seed blower", 
-      dependent_var == "mech_straw_baler" ~ "Straw baler", 
-      dependent_var == "mech_laser_level" ~ "Laser land levelling",
-      dependent_var == "StrainB_edited" ~ "GIFT-derived tilapia strains", 
+      dependent_var == "mech_laser_level" ~ "Laser Land Levelling (LLL)",
+      dependent_var == "StrainB_edited" ~ "Genetically Improved Farmed Tilapia (GIFT)-derived strains",
       dependent_var == "d_1m5r_seed_120kg" ~ "1R: Seed rate (lenient)", 
       dependent_var == "strict_2r" ~ "2R: Nitrogen use (strict)", 
       dependent_var == "lenient_2r" ~ "2R: Nitrogen use (lenient)", 
       dependent_var == "strict_3r" ~ "3R: Pesticide use (strict)", 
       dependent_var == "lenient_3r" ~ "3R: Pesticide use (lenient)", 
-      dependent_var == "ThreeR" ~ "3R3G (lenient)", 
+      dependent_var == "ThreeR" ~ "Three Reductions, Three Gains (3R3G) and One Must Do, Five Reductions (1M5R - lenient)", 
       dependent_var == "awd_1drydown" ~ "Alternate Wetting and Drying (1 dry-down)", 
       dependent_var == "awd_2drydown" ~ "Alternate Wetting and Drying (At least 2 dry-downs)", 
-      dependent_var == "csmap_final" ~ "CS-MAPs", 
+      dependent_var == "csmap_final" ~ "Climate-Smart Mapping and Adaptation Planning (CS-MAP)",
       TRUE ~ dependent_var
     ))
   
@@ -296,9 +326,14 @@ plot_cluster_fn <- function (dataset, name){
 
   # Save the plots
   for (innovation in names(Plots_list)) {
-    # Create the file name with the innovation variable
-    file_name <- paste0("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/Multivariate_analysis/", 
-                        name, "_Adopters of_", gsub(":", "-", innovation), ".png")
+    # Generate file name with special case for 3R3G and 1M5R
+    file_name <- if (innovation == "Three Reductions, Three Gains (3R3G) and One Must Do, Five Reductions (1M5R - lenient)") {
+      paste0("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/Multivariate_analysis/", 
+             name, "_Adopters of_3R3G, 1M5R.png")
+    } else {
+      paste0("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/Multivariate_analysis/", 
+             name, "_Adopters of_", gsub("[/:?*<>|]", "-", innovation), ".png")
+    }
   
     # Save the plot
     png(file_name, width = 1080, height = 600)
@@ -321,8 +356,8 @@ publish_fn <- function (result_table){
   
   results_Overview <- results_Overview %>%
     mutate(dependent_var = case_when(
-      dependent_var == "IRRI-related rice varietie" ~ "Improved rice varieties",
-      dependent_var == "CIAT-related cassava varieties" ~ "Improved cassava varieties", 
+      dependent_var == "IRRI-related rice varietie" ~ "CGIAR-related Rice Varieties",
+      dependent_var == "CIAT-related cassava varieties" ~ "CGIAR-related Cassava Varieties",
       TRUE ~ dependent_var  # Keep original if no match is found
     ))
   
@@ -367,7 +402,7 @@ VH22_OLS_Results <- cluster_fn (df_22, All_22, corr_list_22, fixed_effect = FALS
 
 rownames(VH22_OLS_Results) <- NULL
 
-write.csv(VH22_OLS_Results, "C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/Multivariate_analysis/VH22_OLS_Results.csv",
+write.csv(VH22_OLS_Results, "Output/Multivariate_analysis/VH22_OLS_Results.csv",
           row.names = FALSE)
 
 
@@ -381,7 +416,7 @@ VH23_OLS_Results <- VH23_OLS_Results %>%
 rownames(VH23_OLS_Results) <- NULL
 
 
-write.csv (VH23_OLS_Results, "C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/Multivariate_Analysis/VH23_OLS_Results.csv",
+write.csv (VH23_OLS_Results, "Output/Multivariate_Analysis/VH23_OLS_Results.csv",
            row.names = FALSE)
 
 
@@ -393,7 +428,7 @@ VH22_fixed <- cluster_fn (df_22, All_22, corr_list_22, fixed_effect = TRUE)  %>%
 
 rownames(VH22_fixed) <- NULL
 
-write.csv(VH22_fixed, "C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/Multivariate_analysis/VH22_OLS_Results_FE.csv",
+write.csv(VH22_fixed, "Output/Multivariate_analysis/VH22_OLS_Results_FE.csv",
           row.names = FALSE)
 
 
@@ -403,7 +438,7 @@ VH23_fixed <- cluster_fn (df_23, dependent_23_noCSMAP, corr_list_23, fixed_effec
 
 rownames(VH23_fixed) <- NULL
 
-write.csv(VH23_fixed, "C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/Multivariate_analysis/VH23_OLS_Results_FE.csv",
+write.csv(VH23_fixed, "Output/Multivariate_analysis/VH23_OLS_Results_FE.csv",
           row.names = FALSE)
 
 # 3. Convert the table into publishable formats ----
@@ -411,22 +446,22 @@ write.csv(VH23_fixed, "C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/
 ## Not having regional fixed effects ----
 
 table_22_non_fixed <- publish_fn (VH22_OLS_Results) %>%
-  filter (Innovation %in% c("Improved rice varieties", "Salt-tolerant rice"))
+  filter (Innovation %in% c("CGIAR-related Rice Varieties", "Salt-tolerant Rice Varieties (STRVs)"))
 
-order_dependent <- c("GIFT-derived tilapia strains",
-                     "Improved cassava varieties",
-                     "CMD-resistant cassava QTL",
-                     "Laser land levelling",
-                     "Row seeder",
+order_dependent <- c("Genetically Improved Farmed Tilapia (GIFT)-derived strains",
+                     "CGIAR-related Cassava Varieties",
+                     "Cassava Mosaic Disease (CMD)-resistant Cassava Varieties",
+                     "Laser Land Levelling (LLL)",
+                     'Row Seeder',
                      "Seed blower",
-                     "Combine Harvester",
-                     "Straw Baler",
+                     "Combine Harvester (CHB)",
+                     "Rice Straw Baler",
                      "1R: Seed rate (lenient)",
                      "2R: Nitrogen use (lenient)",
                      "3R: Pesticide use (lenient)",
-                     "3R3G (lenient)",
+                     "Three Reductions, Three Gains (3R3G) and One Must Do, Five Reductions (1M5R - lenient)",
                      "Alternate Wetting and Drying (1 dry-down)",
-                     "Sustainable Water for Coffee Production",
+                     "Climate-Smart Mapping and Adaptation Planning (CS-MAP)",
                      "CS-MAPs")
 
 table_23_non_fixed <- publish_fn (VH23_OLS_Results) %>%
@@ -438,28 +473,28 @@ table_23_non_fixed <- publish_fn (VH23_OLS_Results) %>%
 
 prep_table <- full_join (table_22_non_fixed, table_23_non_fixed)
 
-sub_title1 <- c("Aqualculture and capture fisheries", rep (NA, 9))
+sub_title1 <- c("Aqualculture and Capture fisheries", rep (NA, 9))
 sub_title2 <- c("Breeding Innovations", rep (NA, 9))
 sub_title3 <- c("Climate Change Adaptation Options", rep (NA, 9))
 sub_title4 <- c("Mechanisation", rep (NA, 9))
-sub_title5 <- c("Sustainable Intensification practices", rep (NA, 9))
+sub_title5 <- c("Sustainable Intensification Practices", rep (NA, 9))
 
 prep_table <- prep_table %>%
   rbind(sub_title1, sub_title2, sub_title3, sub_title4, sub_title5)
   
 prep_table_order <- prep_table %>%
-  mutate (order = case_when(Innovation == "Aqualculture and capture fisheries" ~ 0.1,
-                            Innovation == "GIFT-derived tilapia strains" ~ 0.2,
+  mutate (order = case_when(Innovation == "Aqualculture and Capture fisheries" ~ 0.1,
+                            Innovation == "Genetically Improved Farmed Tilapia (GIFT)-derived strains" ~ 0.2,
                             Innovation == "Breeding Innovations" ~ 0.3,
                             Innovation == "Climate Change Adaptation Options" ~ 5.1,
-                            Innovation == "CS-MAPs" ~ 5.2,
+                            Innovation == "Climate-Smart Mapping and Adaptation Planning (CS-MAP)" ~ 5.2,
                             Innovation == "Mechanisation" ~ 5.3,
-                            Innovation == "Sustainable Intensification practices" ~ 10.1,
+                            Innovation == "Sustainable Intensification Practices" ~ 10.1,
                             TRUE ~ row_number())) %>%
   arrange(order) %>%
   select (-order)
 
-write.csv (prep_table_order, "C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/Multivariate_analysis/Tab9.csv",
+write.csv (prep_table_order, "Output/Multivariate_analysis/Tab9.csv",
            row.names = FALSE)  #write as csv file
 
 table9_no_region_effect <- flextable (prep_table_order) %>% 
@@ -469,9 +504,10 @@ table9_no_region_effect <- flextable (prep_table_order) %>%
   merge_at(part = "body", i = 1) %>%
   merge_at(part = "body", i = 3) %>%
   merge_at(part = "body", i = 6) %>%
+  merge_at(part = "body", i = 8) %>%
   merge_at(part = "body", i = 10) %>%
   merge_at(part = "body", i = 16) %>%
-  bold(part = "body", i = c(1,3,6,10,16)) %>%
+  bold(part = "body", i = c(1,3,6, 8, 10,16)) %>%
   # colformat_char(j=3) %>%
   bold(i = 1, part = "header") %>%
   border_inner_h(part = "body", fp_border(width = 0.5)) %>%
@@ -482,29 +518,29 @@ table9_no_region_effect <- flextable (prep_table_order) %>%
 
 table9_no_region_effect
 
-save_as_html(table9_no_region_effect, path = "C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/Multivariate_analysis/Tab9.html" )
+save_as_html(table9_no_region_effect, path = "Output/Multivariate_analysis/Tab9.html" )
 
 
 
 ## With regional fixed effects ----
 table_22_fixed <- publish_fn (VH22_fixed) %>%
-  filter (Innovation %in% c("Improved rice varieties", "Salt-tolerant rice"))
+  filter (Innovation %in% c("CGIAR-related Rice Varieties", "Salt-tolerant Rice Varieties (STRVs)"))
 
-order_dependent <- c("GIFT-derived tilapia strains",
-                     "Improved cassava varieties",
-                     "CMD-resistant cassava QTL",
-                     "Laser land levelling",
-                     "Row seeder",
+order_dependent <- c("Genetically Improved Farmed Tilapia (GIFT)-derived strains",
+                     "CGIAR-related Cassava Varieties",
+                     "Cassava Mosaic Disease (CMD)-resistant Cassava Varieties",
+                     "Laser Land Levelling (LLL)",
+                     "Row Seeder",
                      "Seed blower",
-                     "Combine Harvester",
-                     "Straw Baler",
+                     "Combine Harvester (CHB)",
+                     "Rice Straw Baler",
                      "1R: Seed rate (lenient)",
                      "2R: Nitrogen use (lenient)",
                      "3R: Pesticide use (lenient)",
-                     "3R3G (lenient)",
+                     "Three Reductions, Three Gains (3R3G) and One Must Do, Five Reductions (1M5R - lenient)",
                      "Alternate Wetting and Drying (1 dry-down)",
                      "Sustainable Water for Coffee Production",
-                     "CS-MAPs")
+                     "Climate-Smart Mapping and Adaptation Planning (CS-MAP)")
 
 table_23_fixed <- publish_fn (VH23_fixed) %>%
   filter (Innovation %in% order_dependent) %>%
@@ -515,26 +551,27 @@ table_23_fixed <- publish_fn (VH23_fixed) %>%
 
 prep_table_fixed <- full_join (table_22_fixed, table_23_fixed)
 
-sub_title1 <- c("Aqualculture and capture fisheries", rep (NA, 14))
+sub_title1 <- c("Aqualculture and Capture fisheries", rep (NA, 14))
 sub_title2 <- c("Breeding Innovations", rep (NA, 14))
 sub_title3 <- c("Climate Change Adaptation Options", rep (NA, 14))
 sub_title4 <- c("Mechanisation", rep (NA, 14))
-sub_title5 <- c("Sustainable Intensification practices", rep (NA, 14))
+sub_title5 <- c("Sustainable Intensification Practices", rep (NA, 14))
 
 prep_table_fixed <- prep_table_fixed %>%
   rbind(sub_title1, sub_title2, sub_title3, sub_title4, sub_title5)
 
 prep_table_order_fixed <- prep_table_fixed %>%
-  mutate (order = case_when(Innovation == "Aqualculture and capture fisheries" ~ 0.1,
-                            Innovation == "GIFT-derived tilapia strains" ~ 0.2,
+  mutate (order = case_when(Innovation == "Aqualculture and Capture fisheries" ~ 0.1,
+                            Innovation == "Genetically Improved Farmed Tilapia (GIFT)-derived strains" ~ 0.2,
                             Innovation == "Breeding Innovations" ~ 0.3,
                             Innovation == "Climate Change Adaptation Options" ~ 5.1,
-                            Innovation == "CS-MAPs" ~ 5.2,
+                            Innovation == "Climate-Smart Mapping and Adaptation Planning (CS-MAP)" ~ 5.2,
                             Innovation == "Mechanisation" ~ 5.3,
-                            Innovation == "Sustainable Intensification practices" ~ 10.1,
+                            Innovation == "Sustainable Intensification Practices" ~ 10.1,
                             TRUE ~ row_number())) %>%
   arrange(order) %>%
-  select (-order)
+  select (-order) %>%
+  filter (Innovation != "Climate Change Adaptation Options")
 
 colnames(prep_table_order_fixed)[colnames(prep_table_order_fixed)=="Region2_NMMA"] <- "Region: NMMA"
 colnames(prep_table_order_fixed)[colnames(prep_table_order_fixed)=="Region3_NCCCA"] <- "Region: NCCCA"
@@ -542,9 +579,9 @@ colnames(prep_table_order_fixed)[colnames(prep_table_order_fixed)=="Region4_Cent
 colnames(prep_table_order_fixed)[colnames(prep_table_order_fixed)=="Region5_South East"] <- "Region: South East"
 colnames(prep_table_order_fixed)[colnames(prep_table_order_fixed)=="Region6_MRD"] <- "Region: MRD"
 
+View(prep_table_order_fixed)
 
-
-write.csv (prep_table_order_fixed, "C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/Multivariate_analysis/Appendix.C.csv",
+write.csv (prep_table_order_fixed, "Output/Multivariate_analysis/Appendix.C.csv",
            row.names = FALSE)  #write as csv file
 
 table9_fixed <- flextable (prep_table_order_fixed) %>% 
@@ -554,9 +591,9 @@ table9_fixed <- flextable (prep_table_order_fixed) %>%
   merge_at(part = "body", i = 1) %>%
   merge_at(part = "body", i = 3) %>%
   merge_at(part = "body", i = 6) %>%
-  merge_at(part = "body", i = 9) %>%
-  merge_at(part = "body", i = 15) %>%
-  bold(part = "body", i = c(1,3,6,9,15)) %>%
+  merge_at(part = "body", i = 8) %>%
+  merge_at(part = "body", i = 14) %>%
+  bold(part = "body", i = c(1,3,6,8,14)) %>%
   # colformat_char(j=3) %>%
   bold(i = 1, part = "header") %>%
   border_inner_h(part = "body", fp_border(width = 0.5)) %>%
@@ -567,7 +604,7 @@ table9_fixed <- flextable (prep_table_order_fixed) %>%
 
 table9_fixed
 
-save_as_html(table9_fixed, path = "C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/Multivariate_analysis/Appendix.C.html" )
+save_as_html(table9_fixed, path = "Output/Multivariate_analysis/Appendix.C.html" )
 
 
 
@@ -621,7 +658,7 @@ plot_4 <- VH23_plot[[17]] +
 # Combine the plots with reduced title sizes
 combined_3r3g <- plot_1 | plot_2 | plot_3
 
-ggsave (combined_3r3g, filename = "C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/Multivariate_Analysis/3R3G_Combined_OLS.png",
+ggsave (combined_3r3g, filename = "Output/Multivariate_Analysis/3R3G_Combined_OLS.png",
         width = 15, height = 8)
 
 
@@ -630,14 +667,14 @@ ggsave (combined_3r3g, filename = "C:/Users/BThanh/SPIA Dropbox/SPIA General/SPI
 
 
 plot_rice_1 <- VH23_plot[[5]] + 
-  ggtitle("Improved rice varieties") + 
+  ggtitle("CGIAR-related Rice Varieties") + 
   theme(
     plot.title = element_text(size = 14, margin = margin(b = 10)),  # Add space below the title
     panel.border = element_rect(color = "black", fill = NA, size = 1)  # Optional: add border
   )
 
 plot_rice_2 <- VH23_plot[[6]] + 
-  ggtitle("Saltol QTL") + 
+  ggtitle("Salt-tolerant Rice Varieties (STRVs)") + 
   theme(
     plot.title = element_text(size = 14, margin = margin(b = 10)),  # Add space below the title
     axis.title.y = element_blank(), 
@@ -648,7 +685,7 @@ plot_rice_2 <- VH23_plot[[6]] +
 # Combine the plots with reduced title sizes
 combined_rice <- plot_rice_1 | plot_rice_2 
 
-ggsave (combined_rice, filename = "C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/Multivariate_Analysis/Rice_combined.png",
+ggsave (combined_rice, filename = "Output/Multivariate_Analysis/Rice_combined.png",
         width = 15, height = 8)
 
 
