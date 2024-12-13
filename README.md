@@ -14,4 +14,5 @@ Section | Subsection | Description| Script | Output | Status (will be deleted wh
 |Breeding Innovations|-|Produce Tables 13 and 15|[Breeding Innovations](script/4.%20Breeding%20Innov.R)|Tables 13 and 15|incomplete|
 |General|-|Produce adoption rate table|[Tab 7](script/Tab.7.R)|Table 7|complete|
 |General|-|Produce adoption rate by region table|[Tab 8](script/Tab.8.R)|Table 8|complete|
+|General|-|Produce Table 9 and OLS plots|[Tab 9](script/Tab.9.R)|Table 9; Figures 11, 15, 26, 29, 31, 33, 35, 39, 44, and 46; Apendix C| complete|
 # Software Implementation
