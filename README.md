@@ -17,4 +17,5 @@ Section | Subsection | Description| Script | Output | Status (will be deleted wh
 |General|-|Produce Table 9 and OLS plots|[Table 9](script/Table.9.R)|Table 9; Figures 11, 15, 26, 29, 31, 33, 35, 39, 44, and 46; Apendix C| complete|
 |General|-|Produce Table 5. Overview of socio-economic variables|[Table 5](script/Table.5.R)|Table 5|complete|
 |Environmental Conservation|7. Environment|Payment for Forest Environmental Services (PFES)|[7.Environment](script/7. Environment.R)|Figures 24a,b|complete|
+|Sustainable Intensification Practices|-|1M5R, 3R3G, AWD|[8. SI practices](script/8.%20SI%20practices.R)|Figures 3, 4, 7, 8, 36|complete|
 # Software Implementation
