@@ -13,4 +13,5 @@ Section | Subsection | Description| Script | Output | Status (will be deleted wh
 |Mechanisation|-|Produce Maps|[Mechanisation](script/9.%20Mechanization.R)|Figures 24, 26, 28, 30|complete|
 |Breeding Innovations|-|Produce Tables 13 and 15|[Breeding Innovations](script/4.%20Breeding%20Innov.R)|Tables 13 and 15|incomplete|
 |General|-|Produce adoption rate table|[Tab 7](script/Tab.7.R)|Table 7|complete|
+|General|-|Produce adoption rate by region table|[Tab 8](script/Tab.8.R)|Table 8|complete|
 # Software Implementation
