@@ -82,6 +82,17 @@ curl_function <- function (url)
 
 
 # Prepare layer maps ----
+# Load provincial data: 
+province <- read.csv(curl("https://raw.githubusercontent.com/CGIAR-SPIA/Vietnam-pre-report-2023/main/datasets/Provinces_IDs.csv")) %>%
+  select (-c("CSMAP"))#load provincial data
+
+province$Province_name <- str_remove(province$Province_name, "Tinh ")  #remove "Province" word
+province$Province_name <- str_remove(province$Province_name, "Thanh pho ")  #remove "City" word
+province$Province_name[province$Province_name=="Ba Ria Vung Tau"] <- "Ba Ria - Vung Tau" #rewording
+
+province$MATINH <- str_pad(province$MATINH, width = 2, pad = 0) # format ID of provincial data
+
+
 map <- st_read("/vsicurl/https://raw.githubusercontent.com/CGIAR-SPIA/Vietnam-pre-report-2023/main/datasets/Shape_file/Shape_file/Province_with_Islands.shp")
 
 map$MATINH <- 0
@@ -156,17 +167,6 @@ pfes_prep <- pfes_joined %>%
   mutate (pct = twt * 100 /sum_twt) %>%
   filter (pfes_dummy == 1) %>%
   select (-c(pfes_dummy, twt, sum_twt))
-
-
-# Match them with province name
-province <- read.csv(curl("https://raw.githubusercontent.com/CGIAR-SPIA/Vietnam-pre-report-2023/main/datasets/Provinces_IDs.csv")) %>%
-  select (-c("CSMAP"))#load provincial data
-
-province$Province_name <- str_remove(province$Province_name, "Tinh ")  #remove "Province" word
-province$Province_name <- str_remove(province$Province_name, "Thanh pho ")  #remove "City" word
-province$Province_name[province$Province_name=="Ba Ria Vung Tau"] <- "Ba Ria - Vung Tau" #rewording
-
-province$MATINH <- str_pad(province$MATINH, width = 2, pad = 0) # format ID of provincial data
 
 pfes_prep <- left_join (pfes_prep, province)
 
