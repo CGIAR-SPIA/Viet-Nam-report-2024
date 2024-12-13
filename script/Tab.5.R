@@ -17,7 +17,7 @@ rm(list = ls()) #start clean
 # Install packages ----
 # Function to check and install packages
 
-packages <- c("tidyverse", "flextable", "plyr", "ggplot2", "officer")
+packages <- c("tidyverse", "flextable", "plyr", "ggplot2", "officer", "httr")
 
 check_and_install_package <- function(package_name) {
   if (!requireNamespace(package_name, quietly = TRUE)) {
@@ -34,6 +34,7 @@ library (tidyverse)
 library (flextable)
 library (ggplot2)
 library (officer)
+library (httr)
 
 # Function to format ID values
 format_ID <- function(df, columns, widths, pad_char = "0") {
@@ -52,9 +53,26 @@ format_ID <- function(df, columns, widths, pad_char = "0") {
 columns <- c("MATINH", "MAHUYEN", "MAXA", "MADIABAN", "HOSO")
 widths <- c(2, 3, 5, 3, 3)
 
-## VH22----
+# Function to curl data from GitHub----
+curl_function <- function (url)
+{
+  url_pasted <- paste0 ("https://raw.githubusercontent.com/CGIAR-SPIA/Viet-Nam-report-2024/main/", url)
+  
+  # Ensure the directory exists before saving the file
+  dir_path <- dirname(url)  # Extract the directory path from the URL
+  if (!dir.exists(dir_path)) {
+    dir.create(dir_path, recursive = TRUE)  # Create the directory structure if it doesn't exist
+  }
+  
+  response <- GET(url_pasted, add_headers(Authorization = paste("token", token)))
+  writeBin(content(response, as = "raw"), url)
+}
 
-df_22 <- read.csv ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/VH22_data.csv") %>%
+
+
+## VH22----
+curl_function ("data/processed/VH22_data.csv")
+df_22 <- read.csv ("data/processed/VH22_data.csv") %>%
   mutate (THUNHAP_mil = THUNHAP/1000,
           TONGCHITIEU_mil = TONGCHITIEU/1000,
           land_area_ha = land_area_sum / 10000) %>%
@@ -65,7 +83,8 @@ df_22 <- format_ID (df_22, columns = c("MATINH", "MAHUYEN", "MAXA", "MADIABAN", 
 
 
 ## VH23----
-df_23 <- read.csv ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/VH23_data.csv") %>%
+curl_function ("data/processed/VH23_data.csv")
+df_23 <- read.csv ("data/processed/VH23_data.csv") %>%
   mutate (THUNHAP_mil = THUNHAP/1000,
           TONGCHITIEU_mil = TONGCHITIEU/1000,
           land_area_ha = land_area_sum / 10000) %>%
@@ -178,5 +197,5 @@ ft_result <- flextable(tab_result) %>%
 
 ft_result
 save_as_docx (ft_result, 
-              path = "C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/Tab5.docx",
+              path = "Output/Tab5.docx",
               pr_section = prop_section(page_size(orient = "landscape")))
