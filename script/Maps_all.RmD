@@ -20,7 +20,7 @@ output:
 rm(list = ls())
 
 
-packages <- c("sf", "tidyverse", "haven", "foreign", "readxl", "curl", "httr", "jsonlite", "gridExtra")
+packages <- c("sf", "tidyverse", "haven", "foreign", "readxl", "curl", "httr", "jsonlite", "gridExtra", "reshape2")
 
 check_and_install_package <- function(package_name) {
   if (!requireNamespace(package_name, quietly = TRUE)) {
@@ -36,11 +36,9 @@ library(tidyverse)
 library(haven)
 library(foreign)
 library(readxl)
-# library(readr)
 library(curl)
 library(httr)
 library(jsonlite)
-# library(maditr)
 library(gridExtra)
 library(reshape2)
 
