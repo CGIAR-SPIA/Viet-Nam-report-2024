@@ -1,0 +1,630 @@
+---
+date: "`r Sys.Date()`"
+title: "Maps - Rice varieties"
+author: "CGIAR SPIA, 2024"
+output: 
+  officedown::rdocx_document:
+    mapstyles:
+      Normal: ['First Paragraph']
+  page_margins:
+    bottom: 0.75
+    top: 0.75
+    right: .5
+    left: .5
+    header: 0.5
+    footer: 0.5
+    gutter: 0
+---
+```{r setup, include=FALSE}
+
+rm(list = ls())
+
+
+packages <- c("sf", "tidyverse", "haven", "foreign", "readxl", "curl", "httr", "jsonlite", "gridExtra")
+
+check_and_install_package <- function(package_name) {
+  if (!requireNamespace(package_name, quietly = TRUE)) {
+    install.packages(package_name, dependencies = TRUE)
+    library(package_name, character.only = TRUE)
+  }
+}
+
+invisible(sapply(packages, check_and_install_package))
+
+library(sf)
+library(tidyverse)
+library(haven)
+library(foreign)
+library(readxl)
+# library(readr)
+library(curl)
+library(httr)
+library(jsonlite)
+# library(maditr)
+library(gridExtra)
+library(reshape2)
+
+
+# Access the CGIAR-SPIA repository and download VHLSS 2022 data integrations
+api_url <- "https://api.github.com/repos/CGIAR-SPIA/Vietnam-pre-report-2023/contents/datasets/"
+response <- GET(api_url)
+
+if (status_code(response) == 200) {
+  content_list <- content(response, as = "text")
+  content_list <- fromJSON(content_list)
+  
+  # Filter out only the file names with .dta extension
+  dta_files <- content_list$name[grepl("\\.dta$", content_list$name)]
+  
+  # Create a list to store .dta file contents
+  Import <- list()
+  
+  # Loop through .dta files and import as binary
+  for (dta_file in dta_files) {
+    dta_url <- paste0("https://raw.githubusercontent.com/CGIAR-SPIA/Vietnam-pre-report-2023/main/datasets/", dta_file)
+    dta_response <- GET(dta_url)
+    
+    if (status_code(dta_response) == 200) {
+      dta_content <- content(dta_response, as = "raw")
+      Import[[dta_file]] <- haven::read_dta(dta_content)
+    } else {
+      cat("Error fetching .dta file content:", dta_file, "\n")
+    }
+  }
+  
+  # Print the list of .dta file contents
+  print(Import)
+} else {
+  cat("Error fetching folder content\n")
+}
+
+
+# Function to curl data from GitHub----
+curl_function <- function (url)
+{
+  url_pasted <- paste0 ("https://raw.githubusercontent.com/CGIAR-SPIA/Viet-Nam-report-2024/main/", url)
+  
+  # Ensure the directory exists before saving the file
+  dir_path <- dirname(url)  # Extract the directory path from the URL
+  if (!dir.exists(dir_path)) {
+    dir.create(dir_path, recursive = TRUE)  # Create the directory structure if it doesn't exist
+  }
+  
+  response <- GET(url_pasted, add_headers(Authorization = paste("token", token)))
+  writeBin(content(response, as = "raw"), url)
+}
+
+```
+
+
+```{r}
+IDProv <- read.csv(curl("https://raw.githubusercontent.com/CGIAR-SPIA/Vietnam-pre-report-2023/main/datasets/Provinces_IDs.csv"))
+names(IDProv)[1] = "MATINH"
+for (i in 1:5){Import[[i]] <- Import[[i]] %>% mutate(IDDIABAN=paste(MAXA,MADIABAN,sep = ""))}
+
+
+number <- function(i){as.numeric(as.character(unlist(i)))}
+ma=c("MATINH","MAHUYEN","MAXA","MADIABAN")
+for (j in 1:4) {for (i in 1:5) {Import[[i]][,ma[[j]]] <- number(Import[[i]][,ma[[j]]])} }
+Import <- lapply(Import, left_join,IDProv,by="MATINH")
+#Correct wrong sample ID
+Import[[5]]$M4B113_C16[Import[[5]]$IDHO == "20561005009"]="01162"
+Import[[5]]$M4B113_C16[Import[[5]]$IDHO == "20561005011"]="00934"
+Import[[5]]$M4B113_C16[Import[[5]]$IDHO == "20458007015"]="00658"
+Import[[5]]$M4B113_C16[Import[[5]]$IDHO == "20561005005"]="00710"
+Import[[5]]$M4B113_C16[Import[[5]]$IDHO == "05191009009"]="00844"
+Import[[5]]$M4B113_C16[Import[[5]]$IDHO == "13990017013"]="00780"
+Import[[5]]$M4B113_C16[Import[[5]]$IDHO == "13483003011"]="00368"
+#Drop hh with duplicated barcodes
+dup_code=c("20386004013","20386004015","21295017003","21295017009","23395004007","23539001001","23539001013","23539001015","29401018013","29497008005","30034007003","30034007009")
+Import[[5]]$M4B113_C16[Import[[5]]$IDHO %in% dup_code]=""
+#Filter test case
+ID <- Import[[1]] %>% group_by(IDHO) %>% summarise(IDHO=head(IDHO)) %>% unique()
+ID0 <- Import[[5]]  %>% mutate(Code_new=number(M4B113_C16)) %>% filter(is.na(Code_new)& IDHO %in% ID$IDHO|Code_new<=1250) %>% select(IDHO,M4B113_C16) %>% unique()
+Import <- lapply(Import, function(x){x %>% filter(IDHO %in% ID0$IDHO)})
+
+QTL1 <- read.csv(curl("https://raw.githubusercontent.com/CGIAR-SPIA/Vietnam-pre-report-2023/main/datasets/QTL_markers.csv"))
+for (i in 2:ncol(QTL1)) {
+  c0=grep("[-]",QTL1[,i])
+  c1=grep("[+]",QTL1[,i])
+  QTL1[c0,i]=0;QTL1[c1,i]=1
+  cNA=which(!(QTL1[,i] %in% c(0,1)))
+  QTL1[cNA,i]=NA}
+QTL1[,2:ncol(QTL1)]=number(QTL1[,2:ncol(QTL1)])
+
+recode.gene=function(y){
+  tg=rowSums(QTL1[,y],na.rm = T)*ifelse(rowSums(is.na(QTL1[,y])) == ncol(QTL1[,y]), NA, 1)
+  tg[tg>1]=1
+  return(tg)}
+attach(QTL1)
+QTL1[,2:ncol(QTL1)]=number(QTL1[,2:ncol(QTL1)])
+QTL1=QTL1[,colSums(QTL1,na.rm = T) >0]
+
+CG= inner_join(Import[[5]] %>% mutate(Code_new=number(M4B113_C16)),QTL1,by=c("Code_new"="M4B113_C16")) %>% filter(!is.na(Code_new)&Code_new<=1250)
+```
+
+```{r map, include=FALSE,warning=FALSE,echo=FALSE,message=FALSE}
+
+map <- st_read("/vsicurl/https://raw.githubusercontent.com/CGIAR-SPIA/Vietnam-pre-report-2023/main/datasets/Shape_file/Shape_file/Province_with_Islands.shp")
+
+map$MATINH <- 0
+map$Region <- ""
+t <- rep(NA,65)
+for (i in 1:length(map$ADM1_EN)) {
+  t[[i]] <- ifelse(grep(gsub('( -)','',gsub('( city)','',map$ADM1_EN[[i]])),
+                        IDProv$Province_name) %>% length()==0,0,
+                   grep(gsub('( -)','',gsub('( city)','',map$ADM1_EN[[i]])),
+                        IDProv$Province_name))
+  map$MATINH[[i]] <- ifelse(t[[i]]==0,NA,IDProv$MATINH[[t[[i]]]])
+  map$Region[[i]] <- ifelse(t[[i]]==0,NA,IDProv$Region[[t[[i]]]])}
+map %>% head() %>% print(width = 120) %>% colnames()
+TS <- map %>% filter(ADM1_VI=="Truong Sa") %>% st_geometry()
+cnTS = st_centroid(TS)
+TS_m = (TS-cnTS) * .25 + cnTS + c(-5,0)
+HS <- map %>% filter(ADM1_VI=="Hoang Sa") %>% st_geometry()
+cnHS = st_centroid(HS)
+HS_m =  (HS-cnHS) *.25 + cnHS + c(-2.5,0)
+modified_map <- map %>% filter(!(ADM1_VI %in% c("Truong Sa","Hoang Sa")))
+crs <- st_crs(modified_map)
+TS_map <- map %>% filter(ADM1_VI=="Truong Sa") %>% st_set_geometry(TS_m) %>% st_set_crs(crs)
+HS_map <- map %>% filter(ADM1_VI=="Hoang Sa") %>% st_set_geometry(HS_m) %>% st_set_crs(crs)
+modified_map <- rbind(modified_map,TS_map,HS_map)
+rm(TS,TS_m,TS_map,HS,HS_m,HS_map,cnHS,cnTS,crs)
+
+```
+
+```{r FigA,echo=FALSE,fig.asp = 0.8, fig.width = 9, out.width = "100%"}
+#4.2 Crop germ
+#Tab1 = CG %>% group_by(MATINH) %>% summarise(across(any_of(var41),~sum(.x==1,na.rm = T)/n()))
+#Tab1[,2:ncol(Tab1)] <- Tab1[,2:ncol(Tab1)]*100
+
+# Create dataset by province
+curl_function ("data/processed/Rice.vars.VH24.csv")
+dat <- read.csv ("data/processed/Rice.vars.VH24.csv")
+
+# Fig A. Maps by variety 
+frequency_table <- table(dat$MATINH, dat$Correct_name.DNA2)
+frequency_table_df <- as.data.frame(frequency_table)
+frequency_table_spread <- dcast(frequency_table_df, Var1 ~ ..., value.var = "Freq")
+
+row_sums <- rowSums(frequency_table_spread[, -1])# % Pctn by province
+FigA <- sweep(frequency_table_spread[, -1], 1, row_sums, "/") * 100
+FigA <- cbind(frequency_table_spread [, 1], FigA)
+
+names(FigA)[1] <- 'MATINH'
+FigA$MATINH <- as.numeric (as.character(FigA$MATINH))
+FigA$Improved <- 100 - FigA$Landrace
+
+# Fig B. IRRI-related maps - % IRR_related by province
+curl_function ("data/processed/Rice_Years.csv")
+Years <- read.csv ("data/processed/Rice_Years.csv") 
+dat <- merge (dat, Years, by.x='Correct_name.DNA2', by.y = 'Name', all.x=TRUE) 
+
+frequency_tableB <- table(dat$MATINH, dat$IRRI_Parentage_dummy)
+
+row_sums <- rowSums(frequency_tableB) # % Pctn by province
+FigB <- sweep(frequency_tableB, 1, row_sums, "/") * 100
+FigA <- cbind (FigA, FigB [, c(2)]) # Add column to Figure 1
+names (FigA) [32] <- 'IRRI-related Cultivars'
+
+# Fig C. Map by mean age of release
+dat$Const <- 1 # First filter out if < 5 hhs in the province
+sum_prov <- aggregate (Const ~ MATINH, dat, sum)
+dat <- merge (dat, sum_prov, by='MATINH', all.x=TRUE)
+
+dat$Year <- (2022 - dat$Year)
+FigC <- aggregate (Year ~ MATINH, dat [dat$Const.y >=5 ,], mean)
+
+FigA <- merge (FigA, FigC, by = 'MATINH', all.x=TRUE)
+names (FigA)[33] <- 'Mean Age of Improved Cultivars'
+
+# Fig D, Mean number of year the seed was recycled. 
+FigD <- aggregate (M4B113_C9 ~ MATINH, dat [dat$Correct_name.DNA2 != 'Landrace' ,], mean)
+FigA <- merge (FigA, FigD, by = 'MATINH', all.x=TRUE)
+names (FigA)[34] <- 'Mean Duration of Recycling for Improved Cultivars'
+# NOte: Too many NAs to be meaningful
+
+# Reorder and drop varieties <5 samples nationally 
+FigA <- FigA [, - c(21,10,12,13,22,29,19,20,23)] # "Jasmine 85", "LH12", "LTH31", "RVT", "VN10", "OM576", "OM6162", "OM73417", "SH14")
+FigA <- FigA [, c(1,22,23,24,25,2:21)] # Order of maps as they'll appear
+
+var41= names(FigA)[2:ncol(FigA)]
+
+modified_map <- modified_map %>% left_join(FigA,by="MATINH")
+M.CG <- list()
+for(i in 1:length(var41)) {
+  M.CG[[i]] <- modified_map %>% ggplot() + aes(fill=.data[[var41[i]]])+geom_sf() + scale_fill_gradient2(midpoint = 50, low = "#f7efef", mid = "#9ecae1", high = "#1c4c6f", na.value="#dbd0d0", space = "Lab", name="In %")  +  ggtitle(var41[[i]]) +
+  geom_rect(aes(xmin = 107.5, xmax = 110, ymin = 8.5, ymax = 10), linewidth = 0.1, color = "black", fill = NA) +
+  geom_rect(aes(xmin = 109.3, xmax = 110, ymin = 16.1, ymax = 16.7), linewidth = 0.1, color = "black", fill = NA)+ theme(axis.text.x=element_blank(),axis.text.y=element_blank(),axis.ticks = element_blank())
+}
+
+```
+
+
+```{r Figure15.Rice , echo=FALSE,fig.asp = 0.8, fig.width = 9, out.width = "100%"}
+
+M.CG[[1]] <- modified_map %>% ggplot() + aes(fill=.data[[var41[1]]])+ geom_sf() + scale_fill_gradient2(midpoint = 50, low = "#f7efef", mid = "#9ecae1", high = "#1c4c6f", na.value="#dbd0d0", space = "Lab", name="In %", limits = c(0, 100))  +  ggtitle('(a) Improved varietal adoption') +
+      theme(plot.title = element_text(size = 8, hjust = 0.5)) +
+  geom_rect(aes(xmin = 107.5, xmax = 110, ymin = 8.5, ymax = 10), linewidth = 0.1, color = "black", fill = NA) +
+  geom_rect(aes(xmin = 109.3, xmax = 110, ymin = 16.1, ymax = 16.7), linewidth = 0.1, color = "black", fill = NA)+ theme(axis.text.x=element_blank(),axis.text.y=element_blank(),axis.ticks = element_blank())
+
+M.CG[[2]]  <- modified_map %>% ggplot() + aes(fill=.data[[var41[2]]])+ geom_sf() + scale_fill_gradient2(midpoint = 50, low = "#f7efef", mid = "#9ecae1", high = "#1c4c6f", na.value="#dbd0d0", space = "Lab", name="In %", limits = c(0, 100))  +  ggtitle('(b) IRRI-related varietal adoption') +
+    theme(plot.title = element_text(size = 8, hjust = 0.5)) +
+  geom_rect(aes(xmin = 107.5, xmax = 110, ymin = 8.5, ymax = 10), linewidth = 0.1, color = "black", fill = NA) +
+  geom_rect(aes(xmin = 109.3, xmax = 110, ymin = 16.1, ymax = 16.7), linewidth = 0.1, color = "black", fill = NA)+ theme(axis.text.x=element_blank(),axis.text.y=element_blank(),axis.ticks = element_blank())
+
+M.CG[[3]] <- modified_map %>% ggplot() + aes(fill=.data[[var41[3]]])+ geom_sf() + scale_fill_gradient2(midpoint = 10, low = "#1c4c6f", mid = "#9ecae1", high = "#f7efef", na.value="#dbd0d0", space = "Lab", name="In Years", breaks = seq(0, 20, by =5 ), limits = c(0, 20))  +  ggtitle('(c) Average age of improved varieties') +
+   theme(plot.title = element_text(size = 8, hjust = 0.5)) +
+  geom_rect(aes(xmin = 107.5, xmax = 110, ymin = 8.5, ymax = 10), linewidth = 0.1, color = "black", fill = NA) +
+  geom_rect(aes(xmin = 109.3, xmax = 110, ymin = 16.1, ymax = 16.7), linewidth = 0.1, color = "black", fill = NA)+ theme(axis.text.x=element_blank(),axis.text.y=element_blank(), axis.ticks = element_blank())
+
+
+pdf("Figs Rice varieties.pdf")
+for (i in 1:23) { # Modify HERE 22 by the number of maps to plot
+    print(M.CG[[i]])
+}
+dev.off()
+
+```
+
+```{r Figure14.wrap, echo=FALSE,fig.asp = 0.8, fig.width = 9, out.width = "100%"}
+
+# Three rice map toguether
+
+grid.arrange(M.CG[[1]], M.CG[[2]], M.CG[[3]], ncol = 3)
+
+
+
+
+
+
+
+```
+
+
+```{r Fig40.AWD, echo=FALSE,fig.asp = 0.8, fig.width = 9, out.width = "100%"}
+
+curl_function ("data/processed/VH23_data.csv")
+df_23 <- read.csv("data/processed/VH23_data.csv")
+curl_function ("data/raw/VHLSS_2022_Household/datasets/Provinces_IDs.csv")
+Provinces_IDs <- read.csv("data/raw/VHLSS_2022_Household/datasets/Provinces_IDs.csv")
+
+
+Provinces_IDs$MATINH <- as.numeric (Provinces_IDs$MATINH); df_23$MATINH <- as.numeric (df_23$MATINH)
+df_23 <- merge (df_23, Provinces_IDs, all.x =TRUE)
+
+df_23 <- df_23 %>%
+  filter(!is.na(awd_1drydown) & !is.na(weight_final_rice)) %>% 
+  group_by(MATINH) %>%
+  summarize(
+    Pctn.1dd = sum((awd_1drydown == 1) * weight_final_rice) / sum(weight_final_rice) * 100,
+    Pctn.2dd = sum((awd_2drydown == 1) * weight_final_rice) / sum(weight_final_rice) * 100
+)
+
+# Merge back with the original dataset if needed
+df_23 <- df_23 %>%
+  left_join(df_23, by = "MATINH")
+
+
+modified_map <- modified_map %>% left_join(df_23,by="MATINH")
+
+AWD.p1 <- modified_map %>%
+  ggplot() + 
+  aes(fill = Pctn.1dd.x) + 
+  geom_sf() + 
+  scale_fill_gradient2(midpoint = 15, low = "#f7efef", mid = "#9ecae1", high = "#1c4c6f", 
+                       na.value = "#dbd0d0", space = "Lab", name = "In %", limits = c(0, 30)) +  
+  ggtitle('(a) One drydown') +
+  theme(plot.title = element_text(size = 8, hjust = 0.5)) +
+  geom_rect(aes(xmin = 107.5, xmax = 110, ymin = 8.5, ymax = 10), 
+            linewidth = 0.1, color = "black", fill = NA) +
+  geom_rect(aes(xmin = 109.3, xmax = 110, ymin = 16.1, ymax = 16.7), 
+            linewidth = 0.1, color = "black", fill = NA) + 
+  theme(axis.text.x = element_blank(), 
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank())
+
+
+AWD.p2 <- modified_map %>%
+  ggplot() + 
+  aes(fill = Pctn.2dd.x) + 
+  geom_sf() + 
+  scale_fill_gradient2(midpoint = 15, low = "#f7efef", mid = "#9ecae1", high = "#1c4c6f", 
+                       na.value = "#dbd0d0", space = "Lab", name = "In %", limits = c(0, 30)) +  
+  ggtitle('(b) At least two drydowns') +
+  theme(plot.title = element_text(size = 8, hjust = 0.5)) +
+  geom_rect(aes(xmin = 107.5, xmax = 110, ymin = 8.5, ymax = 10), 
+            linewidth = 0.1, color = "black", fill = NA) +
+  geom_rect(aes(xmin = 109.3, xmax = 110, ymin = 16.1, ymax = 16.7), 
+            linewidth = 0.1, color = "black", fill = NA) + 
+  theme(axis.text.x = element_blank(), 
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank())
+
+
+```
+
+```{r Figure17.Saltol, echo=FALSE,fig.asp = 0.8, fig.width = 9, out.width = "100%"}
+curl_function ("data/processed/VH22_data.csv")
+df_22 <- read.csv("data/processed/VH22_data.csv")
+
+
+Provinces_IDs$MATINH <- as.numeric (Provinces_IDs$MATINH); df_22$MATINH <- as.numeric (df_22$MATINH)
+df_22 <- merge (df_22, Provinces_IDs, all.x =TRUE)
+
+df_22 <- df_22 %>%
+  filter(!is.na(Saltol) & !is.na(weight_rice_DNA)) %>% 
+  group_by(MATINH) %>%
+  summarize(
+    Pctn.saltol = sum((Saltol == 1) * weight_rice_DNA) / sum(weight_rice_DNA) * 100
+)
+
+# Merge back with the original dataset if needed
+df_22 <- df_22 %>%
+  left_join(df_22, by = "MATINH")
+
+modified_map <- modified_map %>% left_join(df_22,by="MATINH")
+
+
+Saltol.map <- modified_map %>%
+  ggplot() + 
+  aes(fill = Pctn.saltol.x) + 
+  geom_sf() + 
+  scale_fill_gradient2(midpoint = 50, low = "#f7efef", mid = "#9ecae1", high = "#1c4c6f", 
+                       na.value = "#dbd0d0", space = "Lab", name = "In %", limits = c(0, 100)) +  
+  theme(plot.title = element_text(size = 8, hjust = 0.5)) +
+  geom_rect(aes(xmin = 107.5, xmax = 110, ymin = 8.5, ymax = 10), 
+            linewidth = 0.1, color = "black", fill = NA) +
+  geom_rect(aes(xmin = 109.3, xmax = 110, ymin = 16.1, ymax = 16.7), 
+            linewidth = 0.1, color = "black", fill = NA) + 
+  theme(axis.text.x = element_blank(), 
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank())
+
+```
+
+
+
+
+```{r Fig33.Fig35.3R3G , echo=FALSE,fig.asp = 0.8, fig.width = 9, out.width = "100%"}
+
+# Figure 35: Household adoption rates at the province-level for (a) Certified seeds, (b) 1R: Seed rate, (c) 2R: Fertilizer, (d) 3R: Pesticide 
+curl_function ("data/processed/VH23_data.csv")
+df <- read.csv("data/processed/VH23_data.csv")
+
+
+Provinces_IDs$MATINH <- as.numeric (Provinces_IDs$MATINH); df$MATINH <- as.numeric (df$MATINH)
+df <- merge (df, Provinces_IDs, all.x =TRUE)
+
+df <- df %>%
+  #filter(!is.na(weight_final_rice)) %>% 
+  group_by(MATINH) %>%
+  summarize(
+   lenient_1m = sum((lenient_1m == 1) * weight_final_rice, na.rm = TRUE) / sum(weight_final_rice, na.rm = TRUE) * 100,
+    lenient_1r = sum((d_1m5r_seed_120kg == 1) * weight_final_rice, na.rm = TRUE) / sum(weight_final_rice, na.rm = TRUE) * 100,
+    lenient_2r = sum((lenient_2r == 1) * weight_final_rice, na.rm = TRUE) / sum(weight_final_rice, na.rm = TRUE) * 100,
+    lenient_3r = sum((lenient_3r == 1) * weight_final_rice, na.rm = TRUE) / sum(weight_final_rice, na.rm = TRUE) * 100
+)
+
+modified_map <- modified_map %>% left_join(df,by="MATINH")
+
+OneM <- modified_map %>%
+  ggplot() + 
+  aes(fill = lenient_1m) + 
+  geom_sf() + 
+  scale_fill_gradient2(midpoint = 50, low = "#f7efef", mid = "#9ecae1", high = "#1c4c6f", 
+                       na.value = "#dbd0d0", space = "Lab", name = "In %", limits = c(0, 100)) +  
+  ggtitle('(a) Certified seeds') +
+  theme(plot.title = element_text(size = 8, hjust = 0.5)) +
+  geom_rect(aes(xmin = 107.5, xmax = 110, ymin = 8.5, ymax = 10), 
+            linewidth = 0.1, color = "black", fill = NA) +
+  geom_rect(aes(xmin = 109.3, xmax = 110, ymin = 16.1, ymax = 16.7), 
+            linewidth = 0.1, color = "black", fill = NA) + 
+  theme(axis.text.x = element_blank(), 
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank())
+
+R1 <- modified_map %>%
+  ggplot() + 
+  aes(fill = lenient_1r) + 
+  geom_sf() + 
+  scale_fill_gradient2(midpoint = 50, low = "#f7efef", mid = "#9ecae1", high = "#1c4c6f", 
+                       na.value = "#dbd0d0", space = "Lab", name = "In %", limits = c(0, 100)) +  
+  ggtitle('(a) 1R: Seed rate') +
+  theme(plot.title = element_text(size = 8, hjust = 0.5)) +
+  geom_rect(aes(xmin = 107.5, xmax = 110, ymin = 8.5, ymax = 10), 
+            linewidth = 0.1, color = "black", fill = NA) +
+  geom_rect(aes(xmin = 109.3, xmax = 110, ymin = 16.1, ymax = 16.7), 
+            linewidth = 0.1, color = "black", fill = NA) + 
+  theme(axis.text.x = element_blank(), 
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank())
+
+R2 <- modified_map %>%
+  ggplot() + 
+  aes(fill = lenient_2r) + 
+  geom_sf() + 
+  scale_fill_gradient2(midpoint = 50, low = "#f7efef", mid = "#9ecae1", high = "#1c4c6f", 
+                       na.value = "#dbd0d0", space = "Lab", name = "In %", limits = c(0, 100)) +  
+  ggtitle('(c) 2R: Fertilizer') +
+  theme(plot.title = element_text(size = 8, hjust = 0.5)) +
+  geom_rect(aes(xmin = 107.5, xmax = 110, ymin = 8.5, ymax = 10), 
+            linewidth = 0.1, color = "black", fill = NA) +
+  geom_rect(aes(xmin = 109.3, xmax = 110, ymin = 16.1, ymax = 16.7), 
+            linewidth = 0.1, color = "black", fill = NA) + 
+  theme(axis.text.x = element_blank(), 
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank())
+
+
+R3 <- modified_map %>%
+  ggplot() + 
+  aes(fill = lenient_3r) + 
+  geom_sf() + 
+  scale_fill_gradient2(midpoint = 50, low = "#f7efef", mid = "#9ecae1", high = "#1c4c6f", 
+                       na.value = "#dbd0d0", space = "Lab", name = "In %", limits = c(0, 100)) +  
+  ggtitle('(d) 3R: Pesticide') +
+  theme(plot.title = element_text(size = 8, hjust = 0.5)) +
+  geom_rect(aes(xmin = 107.5, xmax = 110, ymin = 8.5, ymax = 10), 
+            linewidth = 0.1, color = "black", fill = NA) +
+  geom_rect(aes(xmin = 109.3, xmax = 110, ymin = 16.1, ymax = 16.7), 
+            linewidth = 0.1, color = "black", fill = NA) + 
+  theme(axis.text.x = element_blank(), 
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank())
+
+
+OneM <- OneM + theme(plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), "cm"))
+R1 <- R1 + theme(plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), "cm"))
+R2 <- R2 + theme(plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), "cm"))
+R3 <- R3 + theme(plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), "cm"))
+
+
+a <- grid.arrange(OneM, R1, R2, R3, nrow = 2, ncol = 2)
+
+ggsave (a, filename = "Output/Fig38.spatial.png", dpi = 1024)
+
+
+
+```
+
+
+```{r}
+# Figure 33: Vietnamese provinces referencing 1M5R/3R3G components in agricultural plans  ----
+# Function to plot maps: ----
+create_plot <- function(modified_map, fill_var, title) {
+  ggplot(modified_map) + 
+    aes_string(fill = paste0("factor(", fill_var, ")")) +  # Convert fill_var to factor
+    geom_sf() + 
+    scale_fill_manual(
+      values = c("0" = "#ffffff", "1" = "#1c4c6f"),  # Define colors for each factor level
+      na.value = "#dbd0d0",                          # Color for NA values
+      name = NULL,                                    # Remove legend title
+      breaks = c("1", "0"),                           # Define which levels to display
+      labels = c("Yes", "No")                         # Custom labels for the legend
+    ) +  
+    ggtitle(title) +
+    theme(
+      plot.title = element_text(size = 12, hjust = 0.5),  # Increase title size to 14
+      axis.text.x = element_blank(), 
+      axis.text.y = element_blank(),
+      legend.title = element_blank(), # Ensure legend title is removed
+      axis.ticks = element_blank() 
+    ) +
+    geom_rect(
+      aes(xmin = 107.5, xmax = 110, ymin = 8.5, ymax = 10), 
+      linewidth = 0.1, color = "black", fill = NA
+    ) +
+    geom_rect(
+      aes(xmin = 109.3, xmax = 110, ymin = 16.1, ymax = 16.7), 
+      linewidth = 0.1, color = "black", fill = NA
+    )
+}
+curl_function ("data/processed/ag_plan_1m5r_recode.xlsx")
+ag_plan <- read_excel ("data/processed/ag_plan_1m5r_recode.xlsx") #load ag_plan data
+
+ag_plan <- ag_plan %>%
+  mutate (package = case_when (mention_1M5R == 1 | mention_3R3G == 1 ~ 1,
+                               mention_1M5R == 0 & mention_3R3G == 0 ~ 0,
+                               TRUE ~ NA))  #recode variable
+
+
+Provinces_IDs$MATINH <- as.numeric (Provinces_IDs$MATINH); ag_plan$MATINH <- as.numeric (ag_plan$MATINH)
+ag_plan <- merge (ag_plan, Provinces_IDs, all.x =TRUE)
+
+
+ag_plan <- ag_plan %>%
+  group_by(Province, Year) %>%
+  summarize (
+    MATINH = first(MATINH),
+    package_prv = case_when (mean(package) > 0 ~ 1,
+                             mean(package) == 0 ~ 0),
+    certified_prv = case_when (mean(certified) > 0 ~ 1,
+                               mean(certified) == 0 ~ 0),
+    seeding_prv = case_when (mean(seeding) > 0 ~ 1,
+                             mean(seeding) == 0 ~ 0),
+    pesticide_prv = case_when (mean(pesticide) > 0 ~ 1,
+                               mean(pesticide) == 0 ~ 0),
+    fertilizer_prv = case_when (mean(fertilizer) > 0 ~ 1,
+                                mean(fertilizer) == 0 ~ 0)) %>%
+  mutate (n = n()) %>%
+  pivot_wider (names_from = Year, values_from = c(package_prv, certified_prv, seeding_prv, pesticide_prv, fertilizer_prv)) %>%
+  mutate (mention_package = case_when (mean(c_across(starts_with("package")), na.rm = TRUE) > 0 ~ 1, #if they mention at least once
+                                       TRUE ~ 0),
+          mention_certified = case_when (mean(c_across(starts_with("certified")), na.rm = TRUE) > 0 ~ 1,
+                                         TRUE ~ 0),
+          mention_seeding = case_when (mean(c_across(starts_with("seeding")), na.rm = TRUE) > 0 ~ 1,
+                                       TRUE ~ 0),
+          mention_pest = case_when (mean(c_across(starts_with("pest")), na.rm = TRUE) > 0 ~ 1,
+                                    TRUE ~ 0),
+          mention_fert = case_when (mean(c_across(starts_with("fert")), na.rm = TRUE) > 0 ~ 1,
+                                    TRUE ~ 0)) %>%
+  mutate (repeat_package = case_when (mean(c_across(starts_with("package")), na.rm = TRUE) > 1/n ~ 1, #if they repeatedly mention (more than once)
+                                      TRUE ~ 0),
+          repeat_certified = case_when (mean(c_across(starts_with("certified")), na.rm = TRUE) > 1/n ~ 1,
+                                        TRUE ~ 0),
+          repeat_seeding = case_when (mean(c_across(starts_with("seeding")), na.rm = TRUE) > 1/n ~ 1,
+                                      TRUE ~ 0),
+          repeat_pest = case_when (mean(c_across(starts_with("pest")), na.rm = TRUE) > 1/n ~ 1,
+                                   TRUE ~ 0),
+          repeat_fert = case_when (mean(c_across(starts_with("fert")), na.rm = TRUE) > 1/n ~ 1,
+                                   TRUE ~ 0)) 
+
+modified_map <- modified_map %>% left_join(ag_plan,by="MATINH")
+
+plot_info <- list(
+  list(title = "Certified seeds (Mentioned)", fill_var = "mention_certified"),
+  list(title = "Certified seeds (Repeated)", fill_var = "repeat_certified"),
+  list(title = "1R: Seed rate (Mentioned)", fill_var = "mention_seeding"),
+  list(title = "1R: Seed rate (Repeated)", fill_var = "repeat_seeding"),
+  list(title = "2R: Fertilizer (Mentioned)", fill_var = "mention_fert"),
+  list(title = "2R: Fertilizer (Repeated)", fill_var = "repeat_fert"),
+  #list(title = "3R: Pesticide (Mentioned)", fill_var = "mention_pest"),
+  #list(title = "3R: Pesticide (Repeated)", fill_var = "repeat_pest"),
+  list(title = "3R3G/1M5R (Mentioned)", fill_var = "mention_package"),
+  list(title = "3R3G/1M5R (Repeated)", fill_var = "repeat_package")
+)
+
+
+
+# Create a list of plots
+plots <- lapply(plot_info, function(info) {
+  create_plot(modified_map, info$fill_var, info$title)
+})
+
+# gridExtra::grid.arrange(grobs = c(plots[1], plots[2], plots[3], plots[4], ncol = 2)
+map_ag_plan <- gridExtra::arrangeGrob(grobs = plots, ncol = 2)
+
+map_ag_plan
+
+ggsave (plot = map_ag_plan,
+        "Output/Fig36.png", 
+        width = 6, height = 15, dpi = 1024)
+
+
+
+OneM <- modified_map %>%
+  ggplot() + 
+  aes(fill = mention_certified) + 
+  geom_sf() + 
+  scale_fill_gradient2(midpoint = 50, low = "#f7efef", mid = "#9ecae1", high = "#1c4c6f", 
+                       na.value = "#dbd0d0", space = "Lab", name = "In %", limits = c(0, 100)) +  
+  ggtitle('(a) Certified seeds') +
+  theme(plot.title = element_text(size = 8, hjust = 0.5)) +
+  geom_rect(aes(xmin = 107.5, xmax = 110, ymin = 8.5, ymax = 10), 
+            linewidth = 0.1, color = "black", fill = NA) +
+  geom_rect(aes(xmin = 109.3, xmax = 110, ymin = 16.1, ymax = 16.7), 
+            linewidth = 0.1, color = "black", fill = NA) + 
+  theme(axis.text.x = element_blank(), 
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank())
+
+
+ag_plan <- ag_plan %>%
+  select (starts_with(c("mention", "repeat")))%>%
+  full_join (Provinces_IDs, by = c("Province" = "Province_name")) 
+
+
+
+```
+
