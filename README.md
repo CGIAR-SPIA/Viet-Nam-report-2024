@@ -24,8 +24,11 @@ Section | Subsection | Description| Script | Output | Status (will be deleted wh
 
 # Software Implementation:
 The report uses R version 4.3.2 to generate the results. However, other versions of R may be compatible as well.
+
 To install R:
+
 - Step 1: Download R for [Windows](https://cran.r-project.org/bin/windows/base/) or [macOS](https://cran.r-project.org/bin/macosx/) and install it
 - Step 2: Download and install [RStudio](https://posit.co/download/rstudio-desktop/)
 - To check the current version of R, open RStudio and enter R.version
+  
 For more information, please refer to [The Comprehensive R Archive Network](https://cran.r-project.org/)
