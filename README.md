@@ -17,7 +17,7 @@ Section | Description| Script | Output | Status (will be deleted when published)
 |5. Aquaculture|Produce Table 10|[Aquaculture](script/3.%20Aquaculture.R)|Table 10|complete|
 |6. Breeding Innovations|Produce Tables 13 and 15|[Breeding Innovations](script/4.%20Breeding%20Innov.R)|Tables 13 and 15|complete|
 |7. Climate Change Adaptation Options|-|[CC adaptation](script/5.%20CC%20adaptation.R)|-|complete|
-|8. Environmental Conservation|[7.Environment](script/7.%20Environment.R)|Figures 24a,b|complete|
+|8. Environmental Conservation|Payment for Forest Environmental Services (PFES)|[7.Environment](script/7.%20Environment.R)|Figures 24a,b|complete|
 |9. Mechanisation|Produce Maps|[Mechanisation](script/9.%20Mechanization.R)|Figures 24, 26, 28, 30|complete|
 |10. Sustainable Intensification Practices|1M5R, 3R3G, AWD|[8. SI practices](script/8.%20SI%20practices.R)|Figures 3, 4, 7, 8, 36|complete|
 |Appendix B|Calculated weights|[Weight](https://github.com/CGIAR-SPIA/Viet-Nam-report-2024/blob/main/script/Report_weights.R)|[Weight](Output/Report_weights.csv)|complete|
