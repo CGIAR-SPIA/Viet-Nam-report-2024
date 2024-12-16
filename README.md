@@ -14,7 +14,7 @@ Section | Subsection | Description| Script | Output | Status (will be deleted wh
 |4. Overview of Results|-|Produce adoption rate by region table|[Table 8](script/Table.8.R)|Table 8|complete|
 |4. Overview of Results|-|Produce Table 9 and OLS plots|[Table 9](script/Table.9.R)|Table 9; Figures 11, 15, 26, 29, 31, 33, 35, 39, 44, and 46; Appendix C| complete|
 |5. Aquaculture|-|Produce Table 10|[Aquaculture](script/3.%20Aquaculture.R)|Table 10|complete|
-|6. Breeding Innovations|-|Produce Tables 13 and 15|[Breeding Innovations](script/4.%20Breeding%20Innov.R)|Tables 13 and 15|incomplete|
+|6. Breeding Innovations|-|Produce Tables 13 and 15|[Breeding Innovations](script/4.%20Breeding%20Innov.R)|Tables 13 and 15|complete|
 |7. Climate Change Adaptation Options|-|-|[CC adaptation](script/5.%20CC%20adaptation.R)|-|complete|
 |8. Environmental Conservation|7. Environment|Payment for Forest Environmental Services (PFES)|[7.Environment](script/7. Environment.R)|Figures 24a,b|complete|
 |9. Mechanisation|-|Produce Maps|[Mechanisation](script/9.%20Mechanization.R)|Figures 24, 26, 28, 30|complete|
