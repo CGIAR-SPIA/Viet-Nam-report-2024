@@ -121,8 +121,8 @@ write.xlsx (merged_dat, 'Output/Tab15.Rice.xlsx')
 # See Maps_all.R
 
 # Table 16. Results of the OLS model estimating the relationship between the presence of alleles associated with the Saltol gene on farmer’s plot and salinity risk levels in the MRD ----
-curl_function ()
-VH22_GPS <- read.csv('C:/Users/FKosmowski/OneDrive - CGIAR/DocumentsRedirected/2023 Activities/C2. CS-Map Ag plans/Georeferenced CS-Map/VH22_CSMAPS_all.csv')
+curl_function ("data/processed/VH22_CSMAPS_all.csv")
+VH22_GPS <- read.csv('data/processed/VH22_CSMAPS_all.csv')
 
 table (VH22_GPS$Salinity_E)
 
@@ -158,7 +158,7 @@ summary_table <- summ(lm(Saltol ~ Sal_Medium + Sal_High, data = VH22_GPS), robus
 summary_table <- summ(lm(Saltol ~ Sal_Med_High, data = VH22_GPS), robust = 'HC1', digits = 3)
 
 export_summs(summary_table, robust = 'HC1', digits = 3, 
-             to.file = "docx", file.name = "C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/Tab16.OLS_Saltol.docx")
+             to.file = "docx", file.name = "Output/Tab16.OLS_Saltol.docx")
 
 table (VH22_GPS$Salinity_E, VH22_GPS$Saltol)
 table (VH22_GPS$Salinity_E, VH22_GPS$Sub1)
@@ -176,7 +176,7 @@ summary(lm(Saltol ~ Sal_Low + Sal_Medium + Sal_High, data = VH22_GPS))
   
 summary_table <- summ(lm(Saltol ~ Sal_Medium + Sal_Low + Sal_Med_High, data = VH22_GPS), robust = 'HC1', digits = 3)
 export_summs(summary_table, robust = 'HC1', digits = 3, 
-             to.file = "docx", file.name = "C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/Tab16.OLS_Saltol.docx")
+             to.file = "docx", file.name = "Output/Tab16.OLS_Saltol.docx")
 
 # b) 2 dummies — "low risk" and combine "medium risk and high risk", and possibly 
 
@@ -303,7 +303,8 @@ number_of_unique_values <- length(unique(Cass.DNA$Genotype_rec)) # 20 recoded as
 Cass.DNA$Genotype_rec <- ifelse (Cass.DNA$Genotype_rec == "", Cass.DNA$Genotype, Cass.DNA$Genotype_rec)
 Cass.DNA$Genotype_rec <- ifelse (Cass.DNA$Genotype == "", "Unknown", Cass.DNA$Genotype_rec)
 
-Years <- read.csv ('C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Genetics/Cassava/Cassava_Years.csv') 
+curl_function("data/raw/Genetics/Cassava/Cassava_Years.csv")
+Years <- read.csv ("data/raw/Genetics/Cassava/Cassava_Years.csv") 
 Cass.DNA <- merge (Cass.DNA, Years, by.x='Genotype_rec', by.y = 'Name', all.x=TRUE)  
 
 genotype_df <- as.data.frame(table (Cass.DNA$Genotype_rec))
