@@ -42,9 +42,9 @@ library(httr)
 
 
 # Function to curl data ----
-curl_function <- function (url)
-{
-  url_pasted <- paste0 ("https://raw.githubusercontent.com/CGIAR-SPIA/Viet-Nam-report-2024/main/", url)
+# Curl without token:
+curl_function <- function(url) {
+  url_pasted <- paste0("https://raw.githubusercontent.com/CGIAR-SPIA/Viet-Nam-report-2024/main/", url)
   
   # Ensure the directory exists before saving the file
   dir_path <- dirname(url)  # Extract the directory path from the URL
@@ -52,8 +52,8 @@ curl_function <- function (url)
     dir.create(dir_path, recursive = TRUE)  # Create the directory structure if it doesn't exist
   }
   
-  response <- GET(url_pasted, add_headers(Authorization = paste("token", token)))
-  writeBin(content(response, as = "raw"), url)
+  # Use download.file to fetch the file without requiring a token
+  download.file(url_pasted, destfile = url, mode = "wb")
 }
 
 
