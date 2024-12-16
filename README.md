@@ -8,7 +8,7 @@ Section | Description| Script | Output | Status (will be deleted when published)
 |:-----:|:------:|:------:| :-----:|:-----:|
 |General|Dataset for VH22 innovations and correlates|[VH22 data](script/VH22_data.R)|[VH22 dataset](data/processed/VH22_data.csv), [VH22 codebook](other/codebook%20for%20processed%20data/VH22_data.dic.csv)|complete|
 |General|Dataset for VH22 innovations and correlates| [VH23 data](script/VH23_data.R)|[VH23 dataset](data/processed/VH23_data.csv), [VH23 codebook](other/codebook%20for%20processed%20data/VH23_data.dic.csv)|complete|
-|General|Create all maps in the report|[Maps_all.Rmd](script/Maps_all.RmD) |-|complete|
+|General|Create all maps in the report|[Maps_all.Rmd](script/Maps_all.RmD) |Figures 15, 17, 33, 35, 40 |complete|
 |Executive Summary| CGIAR Reach estimate| Introduction.R | 
 |3. Methods and Data|Produce Table 5. Overview of socio-economic variables|[Table 5](script/Table.5.R)|Table 5|complete|
 |4. Overview of Results|Produce adoption rate table|[Table 7](script/Table.7.R)|Table 7|complete|
