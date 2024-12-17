@@ -330,7 +330,7 @@ reach_tilapia
 ### Coffee reach ----
 
 
-coffee_list <- c("SWCP_confirmed")
+coffee_list <- c("SWCP")
 
 reach_coffee <- list()
 
@@ -385,7 +385,7 @@ all_var <-  c(
   "Sub1", "Saltol", "IRRI_Parentage_edited",
   "CMD_edited", "DMC_edited", "CIAT.related",
   "StrainB_edited",
-  "SWCP_confirmed",
+  "SWCP",
   "pfes_dummy")
 
 adopt_EA <- list ()
