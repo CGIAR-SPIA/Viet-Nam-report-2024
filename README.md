@@ -20,7 +20,7 @@ Section | Description| Script | Output | Status (will be deleted when published)
 |8. Environmental Conservation|Section results|[Environment](script/7.%20Environment.R)|Figures 24a,b|complete|
 |9. Mechanisation|Section results|[Mechanisation](script/9.%20Mechanization.R)|Figures 24, 26, 28, 30|complete|
 |10. Sustainable Intensification Practices|Section results|[SI practices](script/8.%20SI%20practices.R)|Figures 3, 4, 7, 8, 36|complete|
-|Appendix B|Calculated weights|[Weight](https://github.com/CGIAR-SPIA/Viet-Nam-report-2024/blob/main/script/Report_weights.R)|[Weights](Output/Report_weights.csv)|complete|
+|Appendix B|Dataset with calculated weights|[Weights](https://github.com/CGIAR-SPIA/Viet-Nam-report-2024/blob/main/script/Report_weights.R)|[Weights dataset](Output/Report_weights.csv)|complete|
 
 # Software Implementation:
 The report uses R version 4.3.2 to generate the results. However, other versions of R may be compatible as well.
