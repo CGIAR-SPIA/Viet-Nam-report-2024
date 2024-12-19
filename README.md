@@ -1,5 +1,6 @@
 # General Instruction: 
-- Navigate to script file needed under the [script](script) folder. A [summary](#Summary) of each script file is listed below.
+- If you want to download the data only, direct to [data](data), click on the data file. On the top-right corner, you will see an arrow indicating "Downnload raw file". Download and save to your local directory. 
+- To run the code, navigate to script file needed under the [script](script) folder. A [summary](#Summary) of each script file is listed below.
 - On the top right corner of the script file, click on the three-dot button, choose "Download" or Ctrl + Shift + S and save the script to your computer.
 - Run the downloaded script with R. Data sets are curled directly from GitHub using the code, so you don't need to download data files manually. 
 
