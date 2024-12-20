@@ -3,14 +3,14 @@
 
 Welcome to this repository. It houses material and reproducible codes that were used in the SPIA report documenting the adoption of agricultural innovations in Viet Nam. The report is based on data collected by the General Statistics Office from the Vietnam Household Living Standards Survey (VHLSS) collected in 2022, 2023 and 2024 and provides insights into the adoption patterns of 19 agricultural innovations across the country.
 
-# General Instruction: 
+# General Instructions
 
-- To run the code, navigate to script file needed under the [script](script) folder. A [summary](#Summary) of each script file is listed below.
-- On the top right corner of the script file, click on the three-dot button, choose "Download" or Ctrl + Shift + S and save the script to your computer.
-- Run the downloaded script with R. Data sets are curled directly from GitHub using the code, so you don't need to download data files manually. 
-- To download the datasets, go to [data](data). On the top-right corner, you will see an arrow indicating "Download raw file".
+- To run the code, navigate to the desired script file in the [script](script) folder. A [summary](#Summary) of each script file is provided below.
+In the top-right corner of the script file, click on the three-dot button and select "Download" (or use Ctrl + Shift + S) to save the script to your computer.
+Run the downloaded script in R. The datasets are automatically fetched directly from GitHub within the script, so you do not need to download the data files manually.
+If you wish to download the datasets manually, go to the [data](data) folder. In the top-right corner, you will find an arrow icon to "Download raw file."
   
-# Summary:
+# Summary
 Section | Description| Script | Output |
 |:-----:|:------:|:------:| :-----:|
 |-|Dataset for VH22 innovations and correlates|[VH22 data](script/VH22_data.R)|[VH22 dataset](data/processed/VH22_data.csv), [VH22 codebook](other/codebook%20for%20processed%20data/VH22_data.dic.csv)|
@@ -21,12 +21,12 @@ Section | Description| Script | Output |
 |4. Overview of Results|Adoption rate|[Table 7](script/Table.7.R)|Table 7|
 |4. Overview of Results|Adoption rate by region|[Table 8](script/Table.8.R)|Table 8|
 |4. Overview of Results|OLS results|[Table 9](script/Table.9.R)|Table 9; Figures 11, 15, 26, 29, 31, 33, 35, 39, 44, and 46; Appendix C|
-|5. Aquaculture|Section results |[Aquaculture](script/3.%20Aquaculture.R)|Table 10; Fig 9,11,12 |
-|6. Breeding Innovations|Section results |[Breeding Innovations](script/4.%20Breeding%20Innov.R)|Tables 13 and 15|
-|7. Climate Change Adaptation Options|Section results|[CC adaptation](script/5.%20CC%20adaptation.R)|Table 20, Bulletin dataset|
-|8. Environmental Conservation|Section results|[Environment](script/7.%20Environment.R)|Figures 24a,b|
+|5. Aquaculture|Section results |[Aquaculture](script/5.%20Aquaculture.R)|Table 10; Fig 9,11,12 |
+|6. Breeding Innovations|Section results |[Breeding Innovations](script/6.%20Breeding%20Innov.R)|Tables 13 and 15|
+|7. Climate Change Adaptation Options|Section results|[CC adaptation](script/7.%20CC%20adaptation.R)|Table 20, Bulletin dataset|
+|8. Environmental Conservation|Section results|[Environment](script/8.%20Environment.R)|Figures 24a,b|
 |9. Mechanisation|Section results|[Mechanisation](script/9.%20Mechanization.R)|Figures 24, 26, 28, 30|
-|10. Sustainable Intensification Practices|Section results|[SI practices](script/8.%20SI%20practices.R)|Figures 3, 4, 7, 8, 36|
+|10. Sustainable Intensification Practices|Section results|[SI practices](script/10.%20SI%20practices.R)|Figures 3, 4, 7, 8, 36|
 |Appendix B|Dataset with calculated weights|[Weights](https://github.com/CGIAR-SPIA/Viet-Nam-report-2024/blob/main/script/Report_weights.R)|[Weights dataset](Output/Report_weights.csv)|
 
 # Software Implementation:
