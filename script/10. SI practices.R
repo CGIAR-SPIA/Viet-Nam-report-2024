@@ -1,6 +1,6 @@
 
 #---
-# Title: "Tables and figures for the Subsection '3R3G/1M5R'"
+# Title: "Section 10. Sustainable Intensification Practices'"
 # Authors email: b.thanh@contractors.irri.org, fkosmowski@gmail.com
 # Date: "11/2024"
 # ---
