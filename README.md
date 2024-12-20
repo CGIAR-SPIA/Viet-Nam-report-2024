@@ -14,7 +14,7 @@ Section | Description| Script | Output | Status (will be deleted when published)
 |Executive Summary| CGIAR Reach estimates| [Reach](script/Reach.R) | Figure 1 | 
 |3. Methods and Data|Overview of socio-economic variables|[Table 5](script/Table.5.R)|Table 5|
 |4. Overview of Results|Adoption rate|[Table 7](script/Table.7.R)|Table 7|
-|4. Overview of Results|Adoption rate by region|[Table 8](script/Table.8.R)|Table 8|c
+|4. Overview of Results|Adoption rate by region|[Table 8](script/Table.8.R)|Table 8|
 |4. Overview of Results|OLS results|[Table 9](script/Table.9.R)|Table 9; Figures 11, 15, 26, 29, 31, 33, 35, 39, 44, and 46; Appendix C|
 |5. Aquaculture|Section results |[Aquaculture](script/3.%20Aquaculture.R)|Table 10; Fig 9,11,12 |
 |6. Breeding Innovations|Section results |[Breeding Innovations](script/4.%20Breeding%20Innov.R)|Tables 13 and 15|
