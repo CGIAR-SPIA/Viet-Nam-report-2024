@@ -73,6 +73,17 @@ curl_function <- function(url) {
   download.file(url_pasted, destfile = url, mode = "wb")
 }
 
+
+# Create output folders----
+
+output_dir <- "Output"
+
+# Check if the directory exists, if not, create it
+if (!dir.exists(output_dir)) {
+  dir.create(output_dir, recursive = TRUE)
+}
+
+
 # Load data----
 curl_function ("data/processed/VH22_data.csv")
 df_22 <- read.csv ("data/processed/VH22_data.csv")
@@ -533,7 +544,7 @@ var_name <- c(
 
 
 
-table5_print <- result %>%
+table7_print <- result %>%
   mutate (var_name = var_name) %>%
   relocate (var_name, .before = everything()) %>%
   select (-var) 
@@ -556,18 +567,18 @@ var_remove <- c("High-starch cassava varieties (DM QTL)",
 
 
 
-table5_print <- table5_print %>%
+table7_print <- table7_print %>%
   filter (!var_name %in% var_remove)
 
 
-table5_print <- table5_print %>%
+table7_print <- table7_print %>%
   mutate (group_name = c(
     rep ("Aquaculture and Capture Fisheries", 1),
     rep ("Breeding Innovations", 5),
     "Climate Change Adaptation Options",
     "Environmental Conservation",
-    rep ("Mechanization", 3),
-    rep("Sustainable Intensification Practices", 6))) %>%
+    rep ("Mechanization", 4),
+    rep("Sustainable Intensification Practices", 5))) %>%
   relocate (group_name, .before = "var_name") 
 
 
@@ -575,7 +586,7 @@ table5_print <- table5_print %>%
 
 
 
-ft <- flextable(table5_print) %>%
+ft <- flextable(table7_print) %>%
   delete_part(part = "header") %>%
   add_header_row(values = c("", "", 
                             "%EA", "%HH", "Estimated number of hh", 
