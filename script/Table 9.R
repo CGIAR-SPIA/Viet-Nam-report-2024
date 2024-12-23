@@ -161,7 +161,9 @@ corr_list_22 <- c("female", "ethnic", "internet", "land_area_ha","main_str_aspha
 
 
 All_23 <- c(
-  "mech_row_drum_seeder", "mech_seed_blower", "mech_combine_harvester", "mech_straw_baler", "mech_laser_level",
+  "mech_row_drum_seeder", 
+  # "mech_seed_blower", 
+  "mech_combine_harvester", "mech_straw_baler", "mech_laser_level",
   'CIAT.related', "DMC", "CMD",  
   "StrainB_edited", 
   "SWCP", 
@@ -175,7 +177,9 @@ corr_list_23 <- c("female", "ethnic", "internet", "land_area_ha",
 
 
 dependent_23_noCSMAP <- c(
-  "mech_row_drum_seeder", "mech_seed_blower", "mech_combine_harvester", "mech_straw_baler", "mech_laser_level",
+  "mech_row_drum_seeder", 
+  # "mech_seed_blower", 
+  "mech_combine_harvester", "mech_straw_baler", "mech_laser_level",
   'CIAT.related', "DMC", "CMD",  
   "StrainB_edited", 
   "SWCP", 
@@ -231,8 +235,8 @@ cluster_fn <- function (dataset, dependent_set, corr_list, fixed_effect = TRUE){
       dependent_var == 'mech_mini_combiner' ~ "Mini-Combine Harvester (MCHB)",
       dependent_var == 'mech_combine_harvester' ~ "Combine Harvester (CHB)",
       dependent_var == 'mech_straw_baler' ~ "Rice Straw Baler", 
-      dependent_var == 'mech_row_seeder' ~ 'Row Seeder',
-      dependent_var == "mech_row_drum_seeder" ~ "Row Seeder",
+      dependent_var == 'mech_row_seeder' ~ 'Drum Seeder',
+      dependent_var == "mech_row_drum_seeder" ~ "Drum Seeder",
       dependent_var == 'Saltol' ~ "Salt-tolerant Rice Varieties (STRVs)",
       dependent_var == "CIAT.related" ~ "CGIAR-related Cassava Varieties",
       dependent_var == "DMC" ~ "Cassava DMC QTL", 
@@ -452,8 +456,7 @@ order_dependent <- c("Genetically Improved Farmed Tilapia (GIFT)-derived strains
                      "CGIAR-related Cassava Varieties",
                      "Cassava Mosaic Disease (CMD)-resistant Cassava Varieties",
                      "Laser Land Levelling (LLL)",
-                     'Row Seeder',
-                     "Seed blower",
+                     # "Seed blower",
                      "Combine Harvester (CHB)",
                      "Rice Straw Baler",
                      "1R: Seed rate (lenient)",
@@ -461,6 +464,7 @@ order_dependent <- c("Genetically Improved Farmed Tilapia (GIFT)-derived strains
                      "3R: Pesticide use (lenient)",
                      "Three Reductions, Three Gains (3R3G) and One Must Do, Five Reductions (1M5R - lenient)",
                      "Alternate Wetting and Drying (1 dry-down)",
+                     'Drum Seeder',
                      "Climate-Smart Mapping and Adaptation Planning (CS-MAP)",
                      "CS-MAPs")
 
@@ -488,8 +492,8 @@ prep_table_order <- prep_table %>%
                             Innovation == "Breeding Innovations" ~ 0.3,
                             Innovation == "Climate Change Adaptation Options" ~ 5.1,
                             Innovation == "Climate-Smart Mapping and Adaptation Planning (CS-MAP)" ~ 5.2,
-                            Innovation == "Mechanisation" ~ 5.3,
-                            Innovation == "Sustainable Intensification Practices" ~ 10.1,
+                            Innovation == "Mechanisation" ~ 4.3,
+                            Innovation == "Sustainable Intensification Practices" ~ 9.1,
                             TRUE ~ row_number())) %>%
   arrange(order) %>%
   select (-order)
@@ -530,8 +534,7 @@ order_dependent <- c("Genetically Improved Farmed Tilapia (GIFT)-derived strains
                      "CGIAR-related Cassava Varieties",
                      "Cassava Mosaic Disease (CMD)-resistant Cassava Varieties",
                      "Laser Land Levelling (LLL)",
-                     "Row Seeder",
-                     "Seed blower",
+                      # "Seed blower",
                      "Combine Harvester (CHB)",
                      "Rice Straw Baler",
                      "1R: Seed rate (lenient)",
@@ -539,6 +542,7 @@ order_dependent <- c("Genetically Improved Farmed Tilapia (GIFT)-derived strains
                      "3R: Pesticide use (lenient)",
                      "Three Reductions, Three Gains (3R3G) and One Must Do, Five Reductions (1M5R - lenient)",
                      "Alternate Wetting and Drying (1 dry-down)",
+                     "Drum Seeder",
                      "Sustainable Water for Coffee Production",
                      "Climate-Smart Mapping and Adaptation Planning (CS-MAP)")
 
@@ -567,7 +571,7 @@ prep_table_order_fixed <- prep_table_fixed %>%
                             Innovation == "Climate Change Adaptation Options" ~ 5.1,
                             Innovation == "Climate-Smart Mapping and Adaptation Planning (CS-MAP)" ~ 5.2,
                             Innovation == "Mechanisation" ~ 5.3,
-                            Innovation == "Sustainable Intensification Practices" ~ 10.1,
+                            Innovation == "Sustainable Intensification Practices" ~ 8.1,
                             TRUE ~ row_number())) %>%
   arrange(order) %>%
   select (-order) %>%
@@ -590,10 +594,10 @@ table9_fixed <- flextable (prep_table_order_fixed) %>%
   colformat_double(j = c(2:15), digits = 2, na_str = "NA") %>%
   merge_at(part = "body", i = 1) %>%
   merge_at(part = "body", i = 3) %>%
-  merge_at(part = "body", i = 6) %>%
+  # merge_at(part = "body", i = 6) %>%
   merge_at(part = "body", i = 8) %>%
-  merge_at(part = "body", i = 14) %>%
-  bold(part = "body", i = c(1,3,6,8,14)) %>%
+  merge_at(part = "body", i = 12) %>%
+  bold(part = "body", i = c(1,3,8,12)) %>%
   # colformat_char(j=3) %>%
   bold(i = 1, part = "header") %>%
   border_inner_h(part = "body", fp_border(width = 0.5)) %>%
