@@ -493,7 +493,7 @@ prep_table_order <- prep_table %>%
                             Innovation == "Climate Change Adaptation Options" ~ 5.1,
                             Innovation == "Climate-Smart Mapping and Adaptation Planning (CS-MAP)" ~ 5.2,
                             Innovation == "Mechanisation" ~ 4.3,
-                            Innovation == "Sustainable Intensification Practices" ~ 9.1,
+                            Innovation == "Sustainable Intensification Practices" ~ 8.1,
                             TRUE ~ row_number())) %>%
   arrange(order) %>%
   select (-order)
@@ -507,11 +507,11 @@ table9_no_region_effect <- flextable (prep_table_order) %>%
   colformat_double(j = c(2:9), digits = 2, na_str = "NA") %>%
   merge_at(part = "body", i = 1) %>%
   merge_at(part = "body", i = 3) %>%
-  merge_at(part = "body", i = 6) %>%
-  merge_at(part = "body", i = 8) %>%
-  merge_at(part = "body", i = 10) %>%
-  merge_at(part = "body", i = 16) %>%
-  bold(part = "body", i = c(1,3,6, 8, 10,16)) %>%
+  # merge_at(part = "body", i = 6) %>%
+  merge_at(part = "body", i = 7) %>%
+  merge_at(part = "body", i = 9) %>%
+  merge_at(part = "body", i = 14) %>%
+  bold(part = "body", i = c(1,3,7, 9,14)) %>%
   # colformat_char(j=3) %>%
   bold(i = 1, part = "header") %>%
   border_inner_h(part = "body", fp_border(width = 0.5)) %>%
