@@ -80,6 +80,15 @@ curl_function <- function(url) {
 
 
 
+
+# Create output folders----
+output_dir <- "Output"
+
+# Check if the directory exists, if not, create it
+if (!dir.exists(output_dir)) {
+  dir.create(output_dir, recursive = TRUE)
+}
+
 # Prepare layering map----
 map <- st_read("/vsicurl/https://raw.githubusercontent.com/CGIAR-SPIA/Vietnam-pre-report-2023/main/datasets/Shape_file/Shape_file/Province_with_Islands.shp")
 IDProv <- read.csv(curl("https://raw.githubusercontent.com/CGIAR-SPIA/Vietnam-pre-report-2023/main/datasets/Provinces_IDs.csv"))
@@ -165,43 +174,23 @@ ggplot() +
 
 curl_function ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE.csv")
 HH <- read.csv ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE.csv")
-
-# Load GIFT DNA data:
-curl_function("data/processed/GIFT.vars.VH24.csv")
-GIFT <- read.csv("data/processed/GIFT.vars.VH24.csv") %>%
-  select (c(hhidprovince:HH_ID, StrainB, KYDIEUTRA, Strain, Strain_present, I_Q5)) 
-
-# POst-survey edits (incorrect IDs)
-GIFT[which(GIFT$I_Q5== 388893714),]$HH_ID <- 1 #post-survey edit
-GIFT[which(GIFT$I_Q5== 838834349),]$hhidcommune <- 32221 #post-survey edit
-GIFT[which(GIFT$I_Q5 == 395079742),]$hhidcommune <- 4768 #post-survey edit
-
-GIFT[GIFT$I_Q5== 389357944,]$HH_ID <- 3 
-GIFT[GIFT$I_Q5== 395079742,]$hhidcommune <- 4768
-
-GIFT[GIFT$I_Q5== 946323203,]$hhidcommune <- 32124
-GIFT[GIFT$I_Q5== 919137674,]$hhidcommune <- 32124 
-GIFT[GIFT$I_Q5== 919925417,]$hhidcommune <- 32124 
-GIFT[GIFT$I_Q5== 814540905,]$hhidcommune <- 32124 
-
-GIFT[GIFT$I_Q5 == 347338235, c("hhidprovince", "hhiddistrict", "hhidcommune")] <- list(66, 647, 24253)
-GIFT[GIFT$I_Q5 == 836793947, c("hhidprovince", "hhiddistrict", "hhidcommune")] <- list(66, 647, 24253)
-GIFT[GIFT$I_Q5 == 384112029, c("hhidprovince", "hhiddistrict", "hhidcommune")] <- list(66, 647, 24253)
-
-GIFT[GIFT$I_Q5 == 944654164, c("hhidcommune", "HH_ID")] <- list(32048, 6)
-GIFT[GIFT$I_Q5 == 948837834, c("hhidcommune", "HH_ID")] <- list(32050, 3)
-GIFT[GIFT$I_Q5 == 828035937, c("hhidcommune", "HH_ID")] <- list(32059, 15)
-
-GIFT <- GIFT %>%
+HH <- HH %>%
   dplyr::rename (c("MATINH" = "hhidprovince",
             "MAHUYEN" = "hhiddistrict",
             "MAXA" = "hhidcommune",
             "HOSO" = "HH_ID"))
+HH <- format_ID (HH, columns = c("MATINH", "MAHUYEN", "MAXA", "HOSO"), widths = c(2,3,5,3))
 
+
+# Load GIFT DNA data:
+curl_function("data/processed/GIFT.vars.VH24.csv")
+GIFT <- read.csv("data/processed/GIFT.vars.VH24.csv") %>%
+  select (c(MATINH:HOSO, StrainB, KYDIEUTRA, Strain, Strain_present, SubmissionDate, start, end, deviceid)) 
 GIFT <- format_ID (GIFT, columns = c("MATINH", "MAHUYEN", "MAXA", "HOSO"), widths = c(2,3,5,3))
 
 # Data 1; DEPOCEN-SPIA survey (n=204)
-HH <- merge (HH [, -c(7:10)], GIFT , by='I_Q5', all.y=TRUE) # HH data is now n=204, GIFT assignment was added. The hh phone number is used as merger
+HH <- merge (HH [, -c(7:10)], GIFT , by=c("SubmissionDate", "start", "end", "deviceid"), all.y=TRUE)
+# HH data is now n=204, GIFT assignment was added. The device info is used as merger
 
 
 
@@ -417,12 +406,15 @@ write.csv(summary_table, "Output/Tab10.csv", row.names = FALSE)
 
 
 # Hatchery characteristics (text-only)
+curl_function ("data/raw/Genetics/Tilapia/Hatch.DNA.vars.csv")
+Ha.DNA <- read.csv ("data/raw/Genetics/Tilapia/Hatch.DNA.vars.csv") # See l.840 for sourcing
+curl_function ("data/raw/Genetics/Tilapia/HatcheriesModule_WIDE.csv")
+Ha <- read.csv ("data/raw/Genetics/Tilapia/HatcheriesModule_WIDE.csv")
 
-Ha.DNA <- read.csv ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Genetics/Tilapia/Hatch.DNA.vars.csv") # See l.840 for sourcing
-Ha <- read.csv ("C:/Users/FKosmowski/OneDrive - CGIAR/DocumentsRedirected/2023 Activities/D. GIFT Experiment/Data/Final datasets/HatcheriesModule_WIDE.csv")
 Ha <- merge (Ha, Ha.DNA, by='I_Q2', all.y=TRUE) # data is now n=87
 
-Provinces_IDs <- read_excel("C:/Users/FKosmowski/OneDrive - CGIAR/DocumentsRedirected/2023 Activities/VH22 Report/Data/Provinces_IDs.xlsx")
+curl_function ("data/raw/VHLSS_2022_Household/datasets/Provinces_IDs.csv")
+Provinces_IDs <- read.csv("data/raw/VHLSS_2022_Household/datasets/Provinces_IDs.csv")
 Provinces_IDs$MATINH <- as.numeric (Provinces_IDs$MATINH); Ha$Province_ID <- as.numeric (Ha$Province_ID)
 Ha <- merge (Ha, Provinces_IDs, by.x='Province_ID', by.y='MATINH', all.x=TRUE)
 
@@ -479,9 +471,11 @@ table (Ha$R_Q7_1)
 # Figure 5. Map of tilapia strain assignments on three different samples: (a) all tilapia-farming households (n=204), (b) households that purchased fingerlings in the last 3 years (n=62), and (c) hatcheries (n=89) ----
 
 # Map C. Strain by hatcheries
-#Ha <- read.csv ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Genetics/Tilapia/DAPC_by_pop_Ha.csv")
-Ha <- read.csv ("C:/Users/FKosmowski/OneDrive - CGIAR/DocumentsRedirected/2023 Activities/D. GIFT Experiment/Data/Final datasets/HatcheriesModule_WIDE.csv")
-Ha.DNA <- read.csv ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Genetics/Tilapia/Hatch.vars.csv") # See l.840 for sourcing
+curl_function("data/raw/Genetics/Tilapia/HatcheriesModule_WIDE.csv")
+Ha <- read.csv ("data/raw/Genetics/Tilapia/HatcheriesModule_WIDE.csv")
+
+curl_function("data/raw/Genetics/Tilapia/Hatch.vars.csv")
+Ha.DNA <- read.csv ("data/raw/Genetics/Tilapia/Hatch.vars.csv") # See l.840 for sourcing
 # Note: imported from previous section
 Ha <- merge (Ha [, c(13,101,100)], Ha.DNA, by = 'I_Q2', all.y=TRUE);
 Ha <- Ha [complete.cases(Ha$S_Q1.Longitude_1, Ha$S_Q1.Latitude_1), ]
@@ -508,12 +502,17 @@ FigC <- ggplot() +
                                 "Unassigned" = "grey")) +
   theme(plot.title = element_text(hjust = 0.5, vjust = 3), legend.position = "bottom")  # Position legend at the bottom
 
+FigC
 
 # Map A. Strain by households 
-GIFT <- read.csv ('C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Genetics/Tilapia/GIFT.vars.VH24.csv')
-HH <- read.csv ("C:/Users/FKosmowski/OneDrive - CGIAR/DocumentsRedirected/2023 Activities/D. GIFT Experiment/Data/Final datasets/HouseholdModule_WIDE.csv")
+curl_function("data/raw/Genetics/Tilapia/GIFT.vars.VH24.csv")
+GIFT <- read.csv ('data/raw/Genetics/Tilapia/GIFT.vars.VH24.csv')
 
-HH <- merge (HH [, c(15,225,226)], GIFT, by = 'I_Q5', all.y=TRUE);
+curl_function ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE.csv")
+HH <- read.csv ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE.csv")
+
+HH <- merge (HH [, c(1,2,3,4,5,15,225,226)], GIFT, by = c("SubmissionDate", "start", "end", "deviceid"), all.y=TRUE)
+
 HH <- HH [complete.cases(HH$S_Q1.Longitude_1, HH$S_Q1.Latitude_1), ]
 
 HH$Strain <- ifelse (HH$Strain == 'RIA1', 'RIA1 lineage', 
@@ -545,8 +544,15 @@ FigA <- ggplot() +
 # Run previous lines to have 'HH'
 
 # Data 1; DEPOCEN-SPIA survey (n=204)
-HH <- read.csv ("C:/Users/FKosmowski/OneDrive - CGIAR/DocumentsRedirected/2023 Activities/D. GIFT Experiment/Data/Final datasets/HouseholdModule_WIDE.csv")
-HH <- merge (HH, GIFT , by='I_Q5', all.y=TRUE) # HH data is now n=204, GIFT assignment was added. The hh phone number is used as merger
+curl_function ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE.csv")
+HH <- read.csv ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE.csv")
+
+HH <- HH %>%
+  rename (c("MATINH" = "hhidprovince",
+            "MAHUYEN" = "hhiddistrict",
+            "MAXA" = "hhidcommune",
+            "HOSO" = "HH_ID"))
+HH <- merge (HH, GIFT , by=c("SubmissionDate", "start", "end", "deviceid"), all.y=TRUE) # HH data is now n=204, GIFT assignment was added. The device info is used as merger
 
 HH$Purchased <- ifelse (HH$T_Q2_1.x == 'option_1' | HH$T_Q2_1.x == 'option_2' | HH$T_Q2_1.x == 'option_8', FALSE, TRUE)
 table (HH$Purchased) # Correct n=62
@@ -577,6 +583,7 @@ FigB  <- ggplot() +
                                 "Unassigned" = "grey")) +
   theme(plot.title = element_text(hjust = 0.5, vjust = 3), legend.position = "none")  # Position legend at the bottom
 
+FigB
 # Save in 1300 * 915 pixels
 # Note: Legends are turned off and some plot, and graphically rearranged later
 
