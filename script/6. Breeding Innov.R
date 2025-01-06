@@ -2,11 +2,11 @@
 
 # ---
 # Title: "Section 6. Breeding innovations"
-# Author email: "fkosmowski@gmail.com"
+# Author email: "f,kosmowski@cgiar.org"
 # Date: "October 2024"
 # ---
-rm (list = ls())
 
+rm (list = ls())
 
 # Install and load packages ----
 packages <- c("readstata13", "readxl", "foreign", "ggplot2", "forcats", "dplyr",
@@ -65,7 +65,7 @@ curl_function("data/processed/Rice_Years.csv")
 Years <- read.csv ('data/processed/Rice_Years.csv') 
 dat <- merge (dat, Years, by.x='Correct_name.DNA2', by.y = 'Name', all.x=TRUE) 
 
-# Figure 13. Evolution of rice production and exports in Viet Nam, from 2003 to 2023, in thousand tonnes ----
+# Figure 15. Evolution of rice production and exports in Viet Nam, from 2003 to 2023, in thousand tonnes ----
 data <- data.frame(
   Year = c(2003:2023),
   Production = c(34569, 36149, 35833, 35850, 35943, 38730, 38950, 40006, 42399, 43738, 44039, 44975, 45091, 43109, 42739, 44046, 43495, 42765, 43853, 42661, 43498),
@@ -114,10 +114,10 @@ write.xlsx (merged_dat, 'Output/Tab15.Rice.xlsx')
 
 
 
-# Figure 15. Maps showing the percentage adoption of (a) improved varietal adoption, (b) IRRI-related varietal adoption and c) average age of improved varieties in Viet Nam ----
+# Figure 16. Maps showing the percentage adoption of (a) improved varietal adoption, (b) IRRI-related varietal adoption and c) average age of improved varieties in Viet Nam ----
 # Generated in "Rice_Maps_temp.RmD"
 
-# Figure 17. Map showing the intensity of adoption of the saltol gene by province in Vietnam  ----
+# Figure 18. Map showing the intensity of adoption of the saltol gene by province in Vietnam  ----
 # See Maps_all.R
 
 # Table 16. Results of the OLS model estimating the relationship between the presence of alleles associated with the Saltol gene on farmer’s plot and salinity risk levels in the MRD ----
@@ -173,7 +173,7 @@ VH22_GPS$Sal_Medium <- ifelse (VH22_GPS$Salinity_E == 2, TRUE, FALSE)
 VH22_GPS$Sal_High <- ifelse (VH22_GPS$Salinity_E == 3, TRUE, FALSE)
 
 summary(lm(Saltol ~ Sal_Low + Sal_Medium + Sal_High, data = VH22_GPS))
-  
+
 summary_table <- summ(lm(Saltol ~ Sal_Medium + Sal_Low + Sal_Med_High, data = VH22_GPS), robust = 'HC1', digits = 3)
 export_summs(summary_table, robust = 'HC1', digits = 3, 
              to.file = "docx", file.name = "Output/Tab16.OLS_Saltol.docx")
@@ -343,11 +343,3 @@ names(genotype_df)[6] <- 'Dry matter content QTL (in %)'; names(genotype_df)[7] 
 genotype_df <- genotype_df[order(-genotype_df$`Number of samples`), ]
 
 write.xlsx (genotype_df, 'Output/Tab13.Cassava.xlsx') 
-
-
-
-
-
-
-
-
