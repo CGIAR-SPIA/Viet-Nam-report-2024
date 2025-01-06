@@ -28,6 +28,7 @@ check_and_install_package <- function(package_name) {
 }
 
 invisible(sapply(packages, check_and_install_package))
+
 library (tidyverse)
 library (cowplot)
 library (gridExtra)
@@ -58,7 +59,90 @@ curl_function <- function(url) {
 
 
 
-# Figure 21. Number of Vietnamese provinces referencing forecasted reservoir water levels in yearly agricultural plans, by region (2021-2024) ----
+# Figure 21. Number of Vietnamese provinces referencing the strengh of El-Niño in yearly agricultural plans, by region (2021-2024) ----
+
+el_nino_data <- data.frame(
+  Year = c(2021, 2021, 2021, 2022, 2022, 2022, 2023, 2023, 2023, 2024, 2024, 2024),
+  Region = c("MRD", "NM-RRD", "SCC-CH", "MRD", "NM-RRD", "SCC-CH", "MRD", "NM-RRD", "SCC-CH", "MRD", "NM-RRD", "SCC-CH"),
+  Weak_El_Nino = c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+  Moderate_El_Nino = c(1, 0, 0, 1, 0, 1, 4, 1, 1, 2, 3, 1),
+  Strong_El_Nino = c(0, 0, 0, 1, 0, 0, 3, 0, 0, 3, 2, 0)
+)
+
+# Reshape data to long format
+el_nino_data_long <- el_nino_data %>%
+  pivot_longer(cols = c(Weak_El_Nino, Moderate_El_Nino, Strong_El_Nino),
+               names_to = "El_Nino_Type",
+               values_to = "Count")
+
+# Rename and reorder the El Nino Type levels
+el_nino_data_long$El_Nino_Type <- factor(el_nino_data_long$El_Nino_Type, 
+                                         levels = c("Weak_El_Nino", "Moderate_El_Nino", "Strong_El_Nino"),
+                                         labels = c("Weak El Niño", "Moderate El Niño", "Strong El Niño"))
+
+# Define a color palette for El Nino types
+el_nino_color_palette <- scale_fill_manual(values = c("Weak El Niño" = "#6baed6",    # Blue for Weak El Nino
+                                                      "Moderate El Niño" = "#fdae61", # Orange for Moderate El Nino
+                                                      "Strong El Niño" = "#f46d43"))  # Pale red for Strong El Nino
+
+# Create plot for MRD
+plot_mrd <- ggplot(el_nino_data_long[el_nino_data_long$Region == "MRD", ], aes(x = as.factor(Year), y = Count, fill = El_Nino_Type)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  el_nino_color_palette +
+  ylim(0, 5) +  # Set y-axis scale to be between 0 and 8
+  labs(title = "MRD provinces (n=11)") +
+  theme_minimal() +
+  theme(legend.position = "none", 
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        plot.title = element_text(hjust = 0.5))  # Center the title
+
+# Create plot for RRD
+plot_rrd <- ggplot(el_nino_data_long[el_nino_data_long$Region == "NM-RRD", ], aes(x = as.factor(Year), y = Count, fill = El_Nino_Type)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  el_nino_color_palette +
+  ylim(0, 5) +  # Set y-axis scale to be between 0 and 8
+  labs(title = "NM-RRD provinces (n=10)") +
+  theme_minimal() +
+  theme(legend.position = "none", 
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        plot.title = element_text(hjust = 0.5))  # Center the title
+
+# Create plot for NCC-CH
+plot_nccch <- ggplot(el_nino_data_long[el_nino_data_long$Region == "SCC-CH", ], aes(x = as.factor(Year), y = Count, fill = El_Nino_Type)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  el_nino_color_palette +
+  ylim(0, 5) +  # Set y-axis scale to be between 0 and 8
+  labs(title = "SCC-CH provinces (n=8)") +
+  theme_minimal() +
+  theme(legend.position = "none", 
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        plot.title = element_text(hjust = 0.5))  # Center the title
+
+# Extract the legend and rename 'El_Nino_Type' to 'El Niño Category'
+legend_el_nino <- get_legend(
+  ggplot(el_nino_data_long, aes(x = as.factor(Year), y = Count, fill = El_Nino_Type)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    el_nino_color_palette +
+    labs(fill = " ") +  # Rename legend title to "El Niño Category"
+    theme_minimal() +
+    theme(legend.position = "bottom")
+)
+
+# Arrange the three plots horizontally with the legend centered at the bottom
+grid.arrange(
+  arrangeGrob(plot_mrd, plot_rrd, plot_nccch, ncol = 3),
+  legend_el_nino,
+  nrow = 2,
+  heights = c(8, 1)  # Adjust the height ratio to give more space to the plots
+)
+
+
+
+
+# Figure 22. Number of Vietnamese provinces referencing forecasted reservoir water levels in yearly agricultural plans, by region (2021-2024) ----
 
 data <- data.frame(
   Year = c(2021, 2022, 2023, 2024, 2021, 2022, 2023, 2024, 2021, 2022, 2023, 2024),
@@ -142,90 +226,8 @@ grid.arrange(
 
 
 
-# Figure 20. Number of Vietnamese provinces referencing the strengh of El-Niño in yearly agricultural plans, by region (2021-2024) ----
 
-el_nino_data <- data.frame(
-  Year = c(2021, 2021, 2021, 2022, 2022, 2022, 2023, 2023, 2023, 2024, 2024, 2024),
-  Region = c("MRD", "NM-RRD", "SCC-CH", "MRD", "NM-RRD", "SCC-CH", "MRD", "NM-RRD", "SCC-CH", "MRD", "NM-RRD", "SCC-CH"),
-  Weak_El_Nino = c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-  Moderate_El_Nino = c(1, 0, 0, 1, 0, 1, 4, 1, 1, 2, 3, 1),
-  Strong_El_Nino = c(0, 0, 0, 1, 0, 0, 3, 0, 0, 3, 2, 0)
-)
-
-# Reshape data to long format
-el_nino_data_long <- el_nino_data %>%
-  pivot_longer(cols = c(Weak_El_Nino, Moderate_El_Nino, Strong_El_Nino),
-               names_to = "El_Nino_Type",
-               values_to = "Count")
-
-# Rename and reorder the El Nino Type levels
-el_nino_data_long$El_Nino_Type <- factor(el_nino_data_long$El_Nino_Type, 
-                                         levels = c("Weak_El_Nino", "Moderate_El_Nino", "Strong_El_Nino"),
-                                         labels = c("Weak El Niño", "Moderate El Niño", "Strong El Niño"))
-
-# Define a color palette for El Nino types
-el_nino_color_palette <- scale_fill_manual(values = c("Weak El Niño" = "#6baed6",    # Blue for Weak El Nino
-                                                      "Moderate El Niño" = "#fdae61", # Orange for Moderate El Nino
-                                                      "Strong El Niño" = "#f46d43"))  # Pale red for Strong El Nino
-
-# Create plot for MRD
-plot_mrd <- ggplot(el_nino_data_long[el_nino_data_long$Region == "MRD", ], aes(x = as.factor(Year), y = Count, fill = El_Nino_Type)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  el_nino_color_palette +
-  ylim(0, 5) +  # Set y-axis scale to be between 0 and 8
-  labs(title = "MRD provinces (n=11)") +
-  theme_minimal() +
-  theme(legend.position = "none", 
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        plot.title = element_text(hjust = 0.5))  # Center the title
-
-# Create plot for RRD
-plot_rrd <- ggplot(el_nino_data_long[el_nino_data_long$Region == "NM-RRD", ], aes(x = as.factor(Year), y = Count, fill = El_Nino_Type)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  el_nino_color_palette +
-  ylim(0, 5) +  # Set y-axis scale to be between 0 and 8
-  labs(title = "NM-RRD provinces (n=10)") +
-  theme_minimal() +
-  theme(legend.position = "none", 
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        plot.title = element_text(hjust = 0.5))  # Center the title
-
-# Create plot for NCC-CH
-plot_nccch <- ggplot(el_nino_data_long[el_nino_data_long$Region == "SCC-CH", ], aes(x = as.factor(Year), y = Count, fill = El_Nino_Type)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  el_nino_color_palette +
-  ylim(0, 5) +  # Set y-axis scale to be between 0 and 8
-  labs(title = "SCC-CH provinces (n=8)") +
-  theme_minimal() +
-  theme(legend.position = "none", 
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        plot.title = element_text(hjust = 0.5))  # Center the title
-
-# Extract the legend and rename 'El_Nino_Type' to 'El Niño Category'
-legend_el_nino <- get_legend(
-  ggplot(el_nino_data_long, aes(x = as.factor(Year), y = Count, fill = El_Nino_Type)) +
-    geom_bar(stat = "identity", position = "dodge") +
-    el_nino_color_palette +
-    labs(fill = " ") +  # Rename legend title to "El Niño Category"
-    theme_minimal() +
-    theme(legend.position = "bottom")
-)
-
-# Arrange the three plots horizontally with the legend centered at the bottom
-grid.arrange(
-  arrangeGrob(plot_mrd, plot_rrd, plot_nccch, ncol = 3),
-  legend_el_nino,
-  nrow = 2,
-  heights = c(8, 1)  # Adjust the height ratio to give more space to the plots
-)
-
-
-
-
-# Figure 16. Heatmap showing the the occurrences of recommending no rice cultivation or shift to another crop in a given season from 2021 to 2024 in agricultural plannings ----
+# Figure 23. Heatmap showing the the occurrences of recommending no rice cultivation or shift to another crop in a given season from 2021 to 2024 in agricultural plannings ----
 
 # Example data frame
 data <- data.frame(
@@ -322,8 +324,7 @@ table (CS$S2a_Q10e[CS$S1_Q5 == 'yes'], CS$region [CS$S1_Q5 == 'yes'])
 table (CS$S2a_Q10f[CS$S1_Q5 == 'yes'], CS$region [CS$S1_Q5 == 'yes'])
 table (CS$S2a_Q10g[CS$S1_Q5 == 'yes'], CS$region [CS$S1_Q5 == 'yes'])
 
-
-
+# Note: Table was constructed from R output. 
 
 # Change in planting dates in the MRD provinces: merging georeferenced maps with VHLSS ----
 curl_function("data/raw/VHLSS_2022_Household/datasets/Ho_Muc4B11_edited.csv")
@@ -669,7 +670,7 @@ table (VH_merged2$Comp_WS); table (VH_merged2$Comp_SA);
 
 
 
-# Figure 23. Magnitude of change in planting dates recommended by the CS-MAPs in extreme scenarios -----
+# Figure 24. Magnitude of change in planting dates recommended by the CS-MAPs in extreme scenarios -----
 
 round (prop.table (table (VH_merged2$Comp_WS_magn)), 2) * 100
 round (prop.table (table (VH_merged2$Comp_SA_magn)), 2) * 100
@@ -1007,20 +1008,9 @@ setdiff(names(Merge.23), names(Merge.22))
 
 names(df_22)
 
-# Agro-Climatic Bulletins (ACB) ----
 
-
-# Table 18. Percentage of communes in which ACBs were disseminated in 2024 according to project M&E and VHLSS data. 
-
-
-# Ag plans 
-# curl_function ("data/raw/VHLSS_2024_Commune/Q1/SPIA_Phan42.dta")
-# Q1 <- read_dta ("data/raw/VHLSS_2024_Commune/Q1/SPIA_Phan42.dta")
-# 
-# curl_function ("data/raw/VHLSS_2024_Commune/Q2/SPIA_Phan42.dta")
-# Q2 <- read_dta ("data/raw/VHLSS_2024_Commune/Q2/SPIA_Phan42.dta")
-# df_24_C <- rbind (Q1, Q2)
-
+# Table 17. Percentage of communes in which ACBs were disseminated in 2024 according to project M&E and VHLSS data ----
+# Note: Only generates VH24 data, not the ACB monitoring data that is presented in Tab 17
 
 curl_function ("data/raw/VHLSS_2024_Commune/Q1/SPIA_ThongTinXa.dta")
 curl_function ("data/raw/VHLSS_2024_Commune/Q2/SPIA_ThongTinXa.dta")
@@ -1086,7 +1076,5 @@ combined_table <- data.frame(
 combined_table$Receive.Bulletins[is.na(combined_table$Receive.Bulletins)] <- 0
 combined_table <- combined_table [1:13 ,]
 
-write.csv (combined_table, "Output/Bulletins.csv")
-
-names(df_22)
+write.csv (combined_table, "Output/Tab_17_VH24.csv")
 
