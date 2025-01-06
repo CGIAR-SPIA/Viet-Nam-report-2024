@@ -3,7 +3,7 @@
 
 # ---
 # Title: "Section 8. Environment Conservation"
-# Author email: fkosmowski@gmail.com, b.thanh@contractors.irri.org
+# Author email: f.kosmowski@cgiar.org, b.thanh@contractors.irri.org
 # Date: "November 2024"
 # ---
 
@@ -148,6 +148,7 @@ pfes_joined <- pfes %>%
 
 
 # Estimate of the reach of PFES ----
+
 reach_pfes <- pfes_joined %>%
   filter (!is.na(pfes_dummy)) %>%
   group_by (panel, pfes_dummy) %>%
@@ -157,7 +158,7 @@ reach_pfes <- pfes_joined %>%
   filter (pfes_dummy == 1) %>%
   select (-c(sum_twt))
 
-# Figure 24a. Percentage of communes per province with operational Payments for Forest Environmental Services areas ----
+# Figure 25a. Percentage of communes per province with operational Payments for Forest Environmental Services areas ----
 pfes_prep <- pfes_joined %>%
   filter (!is.na(pfes_dummy)) %>%
   group_by (pfes_dummy, MATINH) %>%
@@ -199,7 +200,7 @@ ggsave (pfes_map, filename = "Output/Figure 24a.png",
 
 
 
-# Figure 24b. Percentage of communes per province and total forest area under PFES in 2023 ----
+# Figure 25b. Percentage of communes per province and total forest area under PFES in 2023 ----
 pfes_area <- pfes %>%
   filter (!is.na(M43_C2)) %>%
   group_by (MATINH) %>%
