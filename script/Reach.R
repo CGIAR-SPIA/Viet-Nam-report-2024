@@ -86,15 +86,15 @@ CG.reach.23$sum_CG <- rowSums(
 table (CG.reach.23$sum_CG) # Non adopters, single adopters and multi-adopters
 
 # What are the two innovations adopted together?
-subset_two_innovations <- CG.reach.23[CG.reach.23$sum_CG == 2, ]
-subset_two_innovations$two_innovations <- apply(
-  subset_two_innovations[, c("CIAT.related", "StrainB_edited", "awd_1drydown", "SWCP", "ThreeR", "CSMAP_reach", "mech_laser_level")],
-  1,
-  function(row) paste(names(row)[which(row == 1)], collapse = " & ")
-)
+#subset_two_innovations <- CG.reach.23[CG.reach.23$sum_CG == 2, ]
+#subset_two_innovations$two_innovations <- apply(
+#  subset_two_innovations[, c("CIAT.related", "StrainB_edited", "awd_1drydown", "SWCP", "ThreeR", "CSMAP_reach", "mech_laser_level")],
+#  1,
+#  function(row) paste(names(row)[which(row == 1)], collapse = " & ")
+#)
 
-table_of_two_innovations <- table(subset_two_innovations$two_innovations)
-table_of_two_innovations
+#table_of_two_innovations <- table(subset_two_innovations$two_innovations)
+#table_of_two_innovations
 
 
 # Add weights
