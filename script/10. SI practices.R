@@ -13,8 +13,6 @@
 # Last is a file extracted and recoded from 37 provincial agricultural plans from 2020-2024 (not all years are included in each province) 
 # under the name "ag_plan_recode_1m5r.xlsx". Please be noted that this file is used for the purpose of this subsection only.  
 
-
-
 rm(list = ls()) #start clean
 
 # Install and load packages ----
@@ -240,7 +238,7 @@ df <- left_join (df, province, by = "MATINH") %>%
 
 
 
-# Figure 33: Mentioning 1M5R/3R3G in provincial agriculture plans  ----
+# Figure 34: Vietnamese provinces referencing 1M5R/3R3G components in provincial agriculture plans  ----
 curl_function ("data/processed/ag_plan_1m5r_recode.xlsx")
 ag_plan <- read_excel ("data/processed/ag_plan_1m5r_recode.xlsx") #load ag_plan data
 
@@ -257,7 +255,6 @@ ag_plan <- ag_plan %>%
 
 
 
-# Recode agriculture plan:----
 
 ag_plan <- ag_plan %>%
   group_by(Province, Year) %>%
@@ -324,14 +321,14 @@ plots <- lapply(plot_info, function(info) {
 map_ag_plan <- gridExtra::arrangeGrob(grobs = plots, ncol = 2)
 
 ggsave (plot = map_ag_plan,
-        "Output/10. 3R3G_figures/Figure 36.png", 
+        "Output/Fig_34.png", 
         width = 6, height = 15, dpi = 1024)
 
 
 
 
 
-## Figure 34: Adoption Rates of 1M5R/3R3G Practices by lenient and strict Criteria in Viet Nam in 2023  ----
+## Figure 35: Adoption Rates of 1M5R/3R3G Practices by lenient and strict Criteria in Viet Nam in 2023  ----
 
 var_lenient <- c("lenient_1m", "lenient_1r", "lenient_2r", "lenient_3r")
 var_strict <- c("strict_1m", "strict_1r", "strict_2r", "strict_3r")
@@ -383,22 +380,10 @@ plot <- tab_adopt %>%
   ) +
   scale_fill_manual(values = c("Lenient" = "#1c4c6f", "Strict" = "#d95f02"))  # Different colors for criteria
 
-
-plot
-
-ggsave (plot, filename = "Output/10. 3R3G_figures/3R3G_Figure 3.png", width = 10, height = 6, dpi = 1024)
+ggsave (plot, filename = "Output/Fig_35.png", width = 10, height = 6, dpi = 1024)
 
 
-
-
-
-
-
-
-
-
-
-## Figure 35: Household adoption rates at the province-level for (a) Certified seeds, (b) 1R: Seed rate, (c) 2R: Fertilizer, (d) 3R: Pesticide----
+## Figure 36: Household adoption rates at the province-level for (a) Certified seeds, (b) 1R: Seed rate, (c) 2R: Fertilizer, (d) 3R: Pesticide----
 
 tab_fig4 <- df %>%
   #filter(!is.na(weight_final_rice)) %>% 
@@ -483,13 +468,11 @@ R3 <- R3 + theme(plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), "cm"))
 
 a <- grid.arrange(OneM, R1, R2, R3, nrow = 2, ncol = 2)
 
-a
-
-ggsave (a, filename = "Output/10. 3R3G_figures/Figure4_spatial.png", 
+ggsave (a, filename = "Output/Fig_36.png", 
         height = 15, width = 8, 
         dpi = 1024)
 
-## Figure 37: Incidence of different rice seeding and transplanting methods among (a) non-adopters (b) adopters of 120kg of seed per ha (lenient criterion) and (c) adopters of 100kg of seed per ha (strict criterion)	165 ----
+## Figure 38: Incidence of different rice seeding and transplanting methods among (a) non-adopters (b) adopters of 120kg of seed per ha (lenient criterion) and (c) adopters of 100kg of seed per ha (strict criterion)	165 ----
 
 df <- df %>%
   mutate (ws_method_lab = case_when (ws_method == 1 ~ "Hand seeding",
@@ -579,7 +562,7 @@ ggsave (plot_seed_method, filename = "Output/10. 3R3G_figures/plot_seed_method.p
 
 
 
-## Figure 38: Adoption of fertiliser use recommendations under strict and lenient criteria: (a) number of fertiliser applications, (b) amount of Nitrogen per application, and (c) both -----
+## Figure 39: Adoption of fertiliser use recommendations under strict and lenient criteria: (a) number of fertiliser applications, (b) amount of Nitrogen per application, and (c) both -----
 # Non-Nitrogen fertilizer: 
 
 df %>%
@@ -660,11 +643,11 @@ plot_2r_component <- plot_component_fn(tab_2r_component, footnote = "") +  # Pro
   ylim(c(0, 100))  # Ensure y-axis extends from 0 to 100
 
 
-ggsave(plot_2r_component, filename = "Output/10. 3R3G_figures/Figure7.png", dpi = 1024,
+ggsave(plot_2r_component, filename = "Output/Fig_39.png", dpi = 1024,
        width = 10, height = 5)
 
 
-## Figure 39: Comparison of 1M5R pesticide application requirements under strict and lenient criteria ----
+## Figure 40: Comparison of 1M5R pesticide application requirements under strict and lenient criteria ----
 
 df <- df %>%
   mutate (d_1m5r_pest_timing_lenient = case_when (d_1m5r_pest_40d_sowing == 1 & d_1m5r_pest_20d_harvest == 1 ~ 1,
@@ -694,8 +677,6 @@ for (var in list_3r){
   
   adopt_list[[var]] <- adopt
 }
-
-
 
 tab_3r_component <- bind_rows(adopt_list) %>%
   mutate(
@@ -745,18 +726,11 @@ plot_3r_component <- plot_component_fn(tab_3r_component, footnote = "") +  # Pro
   ylim(c(0, 100))  # Ensure y-axis extends from 0 to 100
 
 
-ggsave(plot_3r_component, filename = "Output/10. 3R3G_figures/Figure8.png", dpi = 1024,
+ggsave(plot_3r_component, filename = "Output/Fig_40.png", dpi = 1024,
        width = 10, height = 5)
 
+## Average pesticide applications (text only) ----
 
-
-
-
-
-
-## Table 3: 3R table ----
-
-# This is to create Table 3 - Situation of applying Pesticides and Fungicides
 df <- df %>%
   mutate(n_drug_mix = rowSums(select(., starts_with("n_drug_mix_")), na.rm = TRUE))
 
@@ -803,23 +777,19 @@ table_df_3r <- flextable (pest_tab) %>%
   autofit()
 
 
-save_as_docx(table_df_3r, path = "Output/10. 3R3G_figures/ft_table3r.docx")
+## Figure 46. Adoption of Water Saving Practices for Coffee Production in the Central Highlands ----
 
-
-
-
-## Figure 45. Adoption of Water Saving Practices for Coffee Production in the Central Highlands ----
 curl_function ("data/raw/VHLSS_2023_Household/Combined_modules/M4B13A.csv")
 M4B13A <- read.csv ("data/raw/VHLSS_2023_Household/Combined_modules/M4B13A.csv")
 
 M4B13A$SWCP <- ifelse (M4B13A$M4B13A_C2 <=3 & M4B13A$M4B13A_C3 <= 400, 1, 0); table (M4B13A$SWCP) # 830/1279 = 65% 
-M4B13A$SWCP_confirmed <- ifelse (M4B13A$M4B13A_C2 <=3 & M4B13A$M4B13A_C3 <= 400 & M4B13A$M4B13A_C4 != 4 , 1, 0); table (M4B13A$SWCP_confirmed) # 357/1279 = 17%. FIltering out hhs not knowing quantity of water used
+#M4B13A$SWCP_confirmed <- ifelse (M4B13A$M4B13A_C2 <=3 & M4B13A$M4B13A_C3 <= 400 & M4B13A$M4B13A_C4 != 4 , 1, 0); table (M4B13A$SWCP_confirmed) # 357/1279 = 17%. FIltering out hhs not knowing quantity of water used
 
 
 M4B13A <- merge (M4B13A, province, all.x =TRUE)
 
-M4B13A <- M4B13A [M4B13A$Province_name %in% c('Tinh Dac Nong','Tinh Dak Lak','Tinh Gia Lai',
-                                              'Tinh Kon Tum','Tinh Lam Dong') ,] 
+M4B13A <- M4B13A [M4B13A$Province_name %in% c('Dac Nong','Dak Lak','Gia Lai',
+                                              'Kon Tum','Lam Dong') ,] 
 
 percentage_data <- M4B13A %>%
   group_by(Province_name) %>%
@@ -829,8 +799,7 @@ percentage_data <- M4B13A %>%
 percentage_data_long <- gather(percentage_data, key = "SWCP_percentage", value = "Percentage", -Province_name)
 
 
-
-a <- ggplot(percentage_data_long, aes(x = Province_name, y = Percentage)) + 
+Fig46 <- ggplot(percentage_data_long, aes(x = Province_name, y = Percentage)) + 
   geom_bar(stat = "identity", position = "dodge", fill = "#1c4c6f") +  # Same color for all bars
   labs(x = " ",  # X-axis shows Province names
        y = "Percentage of Adopters") +  # Y-axis label
@@ -843,9 +812,9 @@ a <- ggplot(percentage_data_long, aes(x = Province_name, y = Percentage)) +
   )
 
 
-
-
 # Table 21. Overview of AWD adoption rates by measurement method ----
+# Note: Table is constructed based on R output
+
 
 curl_function ("data/raw/VHLSS_2023_Household/Final/SPIA_M4B11A.csv")
 M4B11A <- read.csv ("data/raw/VHLSS_2023_Household/Final/SPIA_M4B11A.csv")
@@ -909,6 +878,7 @@ weighted_table2 <- svytable(~awd_2drydown, design = svy_design)
 weighted_df2 <- as.data.frame(weighted_table2)
 weighted_df2$percentage <- round (prop.table(weighted_df2$Freq) * 100, 1)
 weighted_df2
+
 
 # EA-level | One drydown
 df_23_clean$IDCo <- paste (df_23_clean$MATINH, df_23_clean$MAHUYEN, df_23_clean$MAXA, df_23_clean$MADIABAN, sep='-') 
