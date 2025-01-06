@@ -170,7 +170,7 @@ df <- df %>%
 
 var_list <- c(
   "csmap_final",
-  "mech_mini_combiner", "mech_combine_harvester", "mech_straw_baler",
+   "mech_combine_harvester", "mech_straw_baler",
   "mech_laser_level", "mech_row_seeder", "mech_seed_blower",
   
   "lenient_1m", "d_1m5r_certified", 
@@ -369,7 +369,7 @@ reach_coffee
 ## Adoption at EA level:----
 all_var <-  c(
   "csmap_final",
-  "mech_mini_combiner", "mech_combine_harvester", "mech_straw_baler",
+  "mech_combine_harvester", "mech_straw_baler",
   "mech_laser_level", "mech_row_seeder", "mech_seed_blower",
   
   "lenient_1m", "d_1m5r_certified", 
@@ -521,7 +521,7 @@ var_name <- c(
   "Payment for Forest Environmental Services (PFES)",
   "Laser Land Levelling (LLL)",
   "Combine Harvester (CHB)",
-  "Mini-Combine Harvester (MCHB)",
+  #"Mini-Combine Harvester (MCHB)",
   "Rice Straw Baler", 
   "Household used seed blower",
   "Lenient 1M (Households combined certified seeds and own seeds)",
