@@ -1,8 +1,8 @@
 
 
 # ---
-# Title: "Section 5. Aquaculture and capture fisheries"
-# Author email: "FKosmowski@gmail.com"
+# Title: "Section 5. Aquaculture and Capture Fisheries"
+# Author email: "f,kosmowski@cgiar.org", "b.thanh@contractors.irri.org"
 # Date: "October 2024"
 # ---
 
@@ -122,7 +122,7 @@ rm(TS,TS_m,TS_map,HS,HS_m,HS_map,cnHS,cnTS,crs)
 
 
 
-# Figure 1. Number of large-scale aquaculture facilities in Viet Nam (2011-2023) ----
+# Figure 8. Number of large-scale aquaculture facilities in Viet Nam (2011-2023) ----
 
 data <- data.frame(
   Year = factor(2011:2023, levels = 2011:2023),
@@ -138,8 +138,7 @@ ggplot(data, aes(x = Year, y = Values)) +
        y = "Aquaculture facilities") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-# Figure 2. Tilapia aquaculture production in Viet Nam (in thousand tonnes), 2013- 2023 ----
-# Figure 4. Map of Sampled Tilapia Households and Hatcheries in 2023 ----
+# Figure 11. Map of Sampled Tilapia Households and Hatcheries in 2023 ----
 
 curl_function ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE.csv")
 HH <- read.csv ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE.csv")
@@ -170,7 +169,7 @@ ggplot() +
 
 
 
-# Table 2. Characteristics of tilapia-farming households in Vietnam ----
+# Table 10. Characteristics of tilapia-farming households in Vietnam ----
 
 curl_function ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE.csv")
 HH <- read.csv ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE.csv")
@@ -464,11 +463,11 @@ table (Ha$numplot) # 68/87
 # Is ${R_Q1} related to the GIFT tilapia strain or not? 13/87 replied yes (15%)
 table (Ha$R_Q7_1) 
 
-# Table 3. Percentage assignment of hatcheries and household tilapia samples to modal core populations ----
-# Note: Table 3 was taken from Hamilton (2024). R code is included in the report.
+# Table 11. Percentage assignment of hatcheries and household tilapia samples to modal core populations ----
+# Note: Table 3 was taken from Hamilton (2024). R code is included in the study.
 
 
-# Figure 5. Map of tilapia strain assignments on three different samples: (a) all tilapia-farming households (n=204), (b) households that purchased fingerlings in the last 3 years (n=62), and (c) hatcheries (n=89) ----
+# Figure 12. Map of tilapia strain assignments on three different samples: (a) all tilapia-farming households (n=204), (b) households that purchased fingerlings in the last 3 years (n=62), and (c) hatcheries (n=89) ----
 
 # Map C. Strain by hatcheries
 curl_function("data/raw/Genetics/Tilapia/HatcheriesModule_WIDE.csv")
@@ -477,7 +476,8 @@ Ha <- read.csv ("data/raw/Genetics/Tilapia/HatcheriesModule_WIDE.csv")
 curl_function("data/raw/Genetics/Tilapia/Hatch.vars.csv")
 Ha.DNA <- read.csv ("data/raw/Genetics/Tilapia/Hatch.vars.csv") # See l.840 for sourcing
 # Note: imported from previous section
-Ha <- merge (Ha [, c(13,101,100)], Ha.DNA, by = 'I_Q2', all.y=TRUE);
+
+Ha <- merge (Ha [, c(11,98,99)], Ha.DNA, by = 'I_Q2', all.y=TRUE);
 Ha <- Ha [complete.cases(Ha$S_Q1.Longitude_1, Ha$S_Q1.Latitude_1), ]
 
 Ha$S1_Strain <- ifelse (Ha$S1_Strain == 'RIA1', 'RIA1 lineage', 
@@ -511,7 +511,7 @@ GIFT <- read.csv ('data/raw/Genetics/Tilapia/GIFT.vars.VH24.csv')
 curl_function ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE.csv")
 HH <- read.csv ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE.csv")
 
-HH <- merge (HH [, c(1,2,3,4,5,15,225,226)], GIFT, by = c("SubmissionDate", "start", "end", "deviceid"), all.y=TRUE)
+HH <- merge (HH [, c(1,2,3,5,15,223,224)], GIFT, by = c("SubmissionDate", "start", "end", "deviceid"), all.y=TRUE)
 
 HH <- HH [complete.cases(HH$S_Q1.Longitude_1, HH$S_Q1.Latitude_1), ]
 
