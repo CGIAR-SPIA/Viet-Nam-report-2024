@@ -132,6 +132,9 @@ adopt_prep <- vh %>%
 
 # Mapping:
 # Function to plot and save maps:
+if (!dir.exists("Output/Mechanisation")) {
+  dir.create("Output/Mechanisation", recursive = TRUE)
+}
 
 plot_map <- function(var) {
   # Set gradient limits based on the variable
@@ -162,7 +165,7 @@ plot_map <- function(var) {
           axis.ticks = element_blank())
   
   # Save the plot
-  ggsave(plot, filename = paste0("Output/9.%20Mechanisation/", var, ".png"), 
+  ggsave(plot, filename = paste0("Output/Mechanisation/", var, ".png"), 
          width = 1080, height = 600, units = "px")
   
   return(plot)
