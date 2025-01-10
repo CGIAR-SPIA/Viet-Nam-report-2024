@@ -182,11 +182,11 @@ map$Region <- ""
 t <- rep(NA,65)
 for (i in 1:length(map$ADM1_EN)) {
   t[[i]] <- ifelse(grep(gsub('( -)','',gsub('( city)','',map$ADM1_EN[[i]])),
-                        IDProv$Province_name) %>% length()==0,0,
+                        province$Province_name) %>% length()==0,0,
                    grep(gsub('( -)','',gsub('( city)','',map$ADM1_EN[[i]])),
-                        IDProv$Province_name))
-  map$MATINH[[i]] <- ifelse(t[[i]]==0,NA,IDProv$MATINH[[t[[i]]]])
-  map$Region[[i]] <- ifelse(t[[i]]==0,NA,IDProv$Region[[t[[i]]]])}
+                        province$Province_name))
+  map$MATINH[[i]] <- ifelse(t[[i]]==0,NA,province$MATINH[[t[[i]]]])
+  map$Region[[i]] <- ifelse(t[[i]]==0,NA,province$Region[[t[[i]]]])}
 map %>% head() %>% print(width = 120) %>% colnames()
 TS <- map %>% filter(ADM1_VI=="Truong Sa") %>% st_geometry()
 cnTS = st_centroid(TS)
@@ -199,7 +199,7 @@ crs <- st_crs(modified_map)
 TS_map <- map %>% filter(ADM1_VI=="Truong Sa") %>% st_set_geometry(TS_m) %>% st_set_crs(crs)
 HS_map <- map %>% filter(ADM1_VI=="Hoang Sa") %>% st_set_geometry(HS_m) %>% st_set_crs(crs)
 modified_map <- rbind(modified_map,TS_map,HS_map)
-rm(TS,TS_m,TS_map,HS,HS_m,HS_map,cnHS,cnTS,crs, map, IDProv, i, t)
+rm(TS,TS_m,TS_map,HS,HS_m,HS_map,cnHS,cnTS,crs, map, province, i, t)
 
 
 modified_map <- format_ID (modified_map, c("MATINH"), c(2))
