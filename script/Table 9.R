@@ -332,10 +332,10 @@ plot_cluster_fn <- function (dataset, name){
   for (innovation in names(Plots_list)) {
     # Generate file name with special case for 3R3G and 1M5R
     file_name <- if (innovation == "Three Reductions, Three Gains (3R3G) and One Must Do, Five Reductions (1M5R - lenient)") {
-      paste0("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/Multivariate_analysis/", 
+      paste0("Output/Multivariate_analysis/", 
              name, "_Adopters of_3R3G, 1M5R.png")
     } else {
-      paste0("C:/Users/BThanh/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/Multivariate_analysis/", 
+      paste0("Output/Multivariate_analysis/", 
              name, "_Adopters of_", gsub("[/:?*<>|]", "-", innovation), ".png")
     }
   
