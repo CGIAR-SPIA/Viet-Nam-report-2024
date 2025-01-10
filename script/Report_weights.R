@@ -46,8 +46,6 @@ getwd() #get current working directory
 setwd("YOUR_DESTINATION") #change working directory if needed
 
 
-token <- "YOUR_TOKEN" #paste your token here if needed. DELETE THIS LINE AFTER REPO IS PUBLIC
-
 # 1. Install and load packages ----
 # Function to check and install packages
 
@@ -547,20 +545,11 @@ cassava_final_weight <- cass_wt %>%
 curl_function (url = "data/processed/GIFT.vars.VH24.csv")
 
 gift <- read.csv ("data/processed/GIFT.vars.VH24.csv") %>%
-  select (-hhiddistrict)
-
-gift[which(gift$I_Q5== "388893714"),]$HH_ID <- 1 #post-survey edit
-gift[which(gift$I_Q5== "838834349"),]$hhidcommune <- 32221 #post-survey edit
-gift[which(gift$I_Q5 == "395079742"),]$hhidcommune <- 4768 #post-survey
+  select (-MAHUYEN)
 
 
-gift <- format_ID(gift, columns = c("hhidprovince", "hhidcommune", "HH_ID"), widths = c(2, 5, 3))
 
-gift <- gift %>%
-  rename (c("MATINH" = "hhidprovince",
-            # "MAHUYEN" = "hhiddistrict",
-            "MAXA" = "hhidcommune",
-            "HOSO" = "HH_ID"))
+gift <- format_ID(gift, columns = c("MATINH", "MAXA", "HOSO"), widths = c(2, 5, 3))
 
 
 
