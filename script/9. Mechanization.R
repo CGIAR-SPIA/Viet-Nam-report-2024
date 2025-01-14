@@ -218,3 +218,20 @@ for (var in var_list)
   map_list[[var]] <- plot
 }
 
+names(map_list)
+
+# Figure 26. Laser land leveling adoption rates by province ----
+map_list [6]
+# Figure 27. Estimated associations between household characteristics and adoption of laser land leveling ----
+# See Table 5.R script
+# Figure 28. Combine harvester adoption rates by province ----
+map_list [3]
+# Figure 29. Estimated associations between household characteristics and adoption of combine harvesters ----
+# See Table 5.R script
+# Figure 30. Mini-combine harvester adoption rates by province ----
+map_list [1]
+# Figure 31. Estimated associations between household characteristics and adoption of mini-combine harvesters ----
+# See Table 5.R script
+# Figure 32. Rice straw baler adoption rates by province ----
+map_list [5]
+
