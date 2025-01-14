@@ -399,18 +399,9 @@ summary_table
 
 write.csv(summary_table, "Output/Tab10.csv", row.names = FALSE)
 
-
-
-
-
-
 # Hatchery characteristics (text-only)
-curl_function ("data/raw/Genetics/Tilapia/Hatch.DNA.vars.csv")
-Ha.DNA <- read.csv ("data/raw/Genetics/Tilapia/Hatch.DNA.vars.csv") # See l.840 for sourcing
-curl_function ("data/raw/Genetics/Tilapia/HatcheriesModule_WIDE.csv")
-Ha <- read.csv ("data/raw/Genetics/Tilapia/HatcheriesModule_WIDE.csv")
-
-Ha <- merge (Ha, Ha.DNA, by='I_Q2', all.y=TRUE) # data is now n=87
+curl_function ("data/raw/Genetics/Tilapia/Hatch_anonymised.csv")
+Ha <- read.csv ("data/raw/Genetics/Tilapia/Hatch_anonymised.csv")
 
 curl_function ("data/raw/VHLSS_2022_Household/datasets/Provinces_IDs.csv")
 Provinces_IDs <- read.csv("data/raw/VHLSS_2022_Household/datasets/Provinces_IDs.csv")
@@ -424,7 +415,6 @@ Ha$R_Q8_rec <- ifelse (Ha$R_Q8a_1 == 'option_3', Ha$R_Q8_1*10000,
                        ifelse (Ha$R_Q8a_1 == 'option_2', Ha$R_Q8_1*1000, 
                                ifelse (Ha$R_Q8a_1 == 'option_1', Ha$R_Q8_1*1, 
                                        ifelse (Ha$R_Q8a_1 == 'option_4', Ha$R_Q8_1*900, Ha$R_Q8_1)))) # Assumes / 3 cm: 800-1000 fishes/ kg
-
 
 # Hatchery type
 table (Ha$I_Q4) # 57/87 private; 7/87 cooeprative and 23/87 public
@@ -454,7 +444,7 @@ table (Ha$Origin_fin) # 18/87
 # Volumes sold by province
 table (Ha$R_Q8_rec) # Sold fingerlings last 12 months
 mean (Ha$R_Q8_rec); sd (Ha$R_Q8_rec) # Sold fingerlings last 12 months
-by (Ha$R_Q8_rec, Ha$Region, mean) # Southeast, RRD and Central Highlands sold the most
+by (Ha$R_Q8_rec, Ha$Region.x, mean) # Southeast, RRD and Central Highlands sold the most
 sum (Ha$R_Q8_rec)
 
 # Number of stains availabe for sale in the last 12 months
