@@ -1,7 +1,9 @@
 
 # SPIA Viet Nam Report: Global Ambitions, Sustainable Pathways (2024)
 
-Welcome to this repository, which contains the materials and reproducible code used in the SPIA report on the adoption of agricultural innovations in Vietnam. The report is based on data from the Vietnam Household Living Standards Survey (VHLSS), collected by the General Statistics Office in 2022, 2023, and 2024. It offers insights into the adoption patterns of 19 CGIAR-related agricultural innovations across the country.
+Welcome to this repository, which contains the reproducible code used in the [SPIA report]() on the adoption of agricultural innovations in Viet Nam. The report is based on data from the Vietnam Household Living Standards Survey (VHLSS), collected by the General Statistics Office in 2022, 2023, and 2024. It offers insights into the adoption patterns of 19 CGIAR-related agricultural innovations across the country.
+
+Additional material from the report are available in an OpenICPSR repository [here](https://www.openicpsr.org/openicpsr/project/212901/version/V1).
 
 # General Instructions
 
@@ -25,17 +27,20 @@ Section | Description| Script | Output |
 |6. Breeding Innovations|Section results |[Breeding Innovations](script/6.%20Breeding%20Innov.R)|Tables 13, 15, 16; Figures 15, 16, 18|
 |7. Climate Change Adaptation Options|Section results|[CC adaptation](script/7.%20CC%20adaptation.R)|Tables 17, 18, 20; Figures 21, 22, 23, 24|
 |8. Environmental Conservation|Section results|[Environment](script/8.%20Environment.R)|Figures 25a,b|
-|9. Mechanisation|Section results|[Mechanisation](script/9.%20Mechanization.R)|Figures 24, 26, 28, 30|
+|9. Mechanisation|Section results|[Mechanisation](script/9.%20Mechanization.R)|Figures 26, 28, 30, 32|
 |10. Sustainable Intensification Practices|Section results|[SI practices](script/10.%20SI%20practices.R)|Table 21, Figures 34, 35, 36, 38, 39, 40, 46|
 |Appendix B|Dataset with calculated weights|[Weights](https://github.com/CGIAR-SPIA/Viet-Nam-report-2024/blob/main/script/Report_weights.R)|[Weights dataset](Output/Report_weights.csv)|
 
 # Software Implementation:
-The report uses R version 4.3.2 to generate the results. However, other versions of R may be compatible as well.
+The report uses R version 4.3.2 (2023-06-16 ucrt)
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+Running under: Windows 11 x64 (build 22631)
+
 
 To install R:
 
-- Step 1: Download R for [Windows](https://cran.r-project.org/bin/windows/base/) or [macOS](https://cran.r-project.org/bin/macosx/) and install it
-- Step 2: Download and install [RStudio](https://posit.co/download/rstudio-desktop/)
-- To check the current version of R, open RStudio and enter R.version
+- Download R for [Windows](https://cran.r-project.org/bin/windows/base/) or [macOS](https://cran.r-project.org/bin/macosx/) and install it
+- Download and install [RStudio](https://posit.co/download/rstudio-desktop/)
+- To check the current version of R, open RStudio and enter "R.version"
   
 For more information, please refer to [The Comprehensive R Archive Network](https://cran.r-project.org/)
