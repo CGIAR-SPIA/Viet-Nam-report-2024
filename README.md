@@ -3,7 +3,7 @@
 
 Welcome to this repository, which contains the reproducible code used in the [SPIA report]() on the adoption of agricultural innovations in Viet Nam. The report is based on data from the Vietnam Household Living Standards Survey (VHLSS), collected by the General Statistics Office in 2022, 2023, and 2024. It offers insights into the adoption patterns of 19 CGIAR-related agricultural innovations across the country.
 
-Additional materials from the report are available in an OpenICPSR repository [here](https://www.openicpsr.org/openicpsr/project/212901/version/V1/view).
+Additional materials from the report are available in an OpenICPSR repository [here]([https://www.openicpsr.org/openicpsr/project/212901/version/V1/view](https://www.openicpsr.org/openicpsr/project/212901)).
 
 # General Instructions
 
