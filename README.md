@@ -1,7 +1,7 @@
 
 # SPIA Viet Nam Report: Global Ambitions, Sustainable Pathways (2024)
 
-Welcome to this repository, which contains the reproducible code used in the [SPIA report]() on the adoption of agricultural innovations in Viet Nam. The report is based on data from the Vietnam Household Living Standards Survey (VHLSS), collected by the General Statistics Office in 2022, 2023, and 2024. It offers insights into the adoption patterns of 19 CGIAR-related agricultural innovations across the country.
+Welcome to this repository, which contains the reproducible code used in the [SPIA report](https://cgspace.cgiar.org/server/api/core/bitstreams/f917cc1f-70f5-4f3f-b230-44dad07265c2/content) on the adoption of agricultural innovations in Viet Nam. The report is based on data from the Vietnam Household Living Standards Survey (VHLSS), collected by the General Statistics Office in 2022, 2023, and 2024. It offers insights into the adoption patterns of 19 CGIAR-related agricultural innovations across the country.
 
 Additional materials from the report are available in an OpenICPSR repository [here](https://www.openicpsr.org/openicpsr/project/212901).
 
