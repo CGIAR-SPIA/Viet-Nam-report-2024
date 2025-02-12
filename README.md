@@ -3,7 +3,7 @@
 
 Welcome to this repository, which contains the reproducible code used in the [SPIA report]() on the adoption of agricultural innovations in Viet Nam. The report is based on data from the Vietnam Household Living Standards Survey (VHLSS), collected by the General Statistics Office in 2022, 2023, and 2024. It offers insights into the adoption patterns of 19 CGIAR-related agricultural innovations across the country.
 
-Additional materials from the report are available in an OpenICPSR repository [here]([https://www.openicpsr.org/openicpsr/project/212901/version/V1/view](https://www.openicpsr.org/openicpsr/project/212901)).
+Additional materials from the report are available in an OpenICPSR repository [here](https://www.openicpsr.org/openicpsr/project/212901).
 
 # General Instructions
 
@@ -19,10 +19,10 @@ Section | Description| Script | Output |
 |-|Dataset for VH23 innovations and correlates| [VH23 data](script/VH23_data.R)|[VH23 dataset](data/processed/VH23_data.csv), [VH23 codebook](other/codebook%20for%20processed%20data/VH23_data.dic.csv)|
 |-|Create all maps in the report|[Maps_all](script/Maps_all.RmD) |Figures 15, 17, 33, 35, 40 |
 |Executive Summary| CGIAR Reach estimates| [Reach](script/Reach.R) | Figure 1 | 
-|3. Methods and Data|Overview of socio-economic variables|[Table 5](script/Table%5.R)|Table 5|
-|4. Overview of Results|Adoption rate|[Table 7](script/Table%7.R)|Table 7|
-|4. Overview of Results|Adoption rate by region|[Table 8](script/Table%8.R)|Table 8|
-|4. Overview of Results|OLS results|[Table 9](script/Table%9.R)|Table 9; Figures 13, 17, 27, 29, 31, 33, 37, 42, and 47; Appendix E|
+|3. Methods and Data|Overview of socio-economic variables|[Table 5](script/Table%205.R)|Table 5|
+|4. Overview of Results|Adoption rate|[Table 7](script/Table%207.R)|Table 7|
+|4. Overview of Results|Adoption rate by region|[Table 8](script/Table%208.R)|Table 8|
+|4. Overview of Results|OLS results|[Table 9](script/Table%209.R)|Table 9; Figures 13, 17, 27, 29, 31, 33, 37, 42, and 47; Appendix E|
 |5. Aquaculture|Section results |[Aquaculture](script/5.%20Aquaculture.R)|Tables 10, 11; Figures 8, 11, 12 |
 |6. Breeding Innovations|Section results |[Breeding Innovations](script/6.%20Breeding%20Innov.R)|Tables 13, 15, 16; Figures 15, 16, 18|
 |7. Climate Change Adaptation Options|Section results|[CC adaptation](script/7.%20CC%20adaptation.R)|Tables 17, 18, 20; Figures 21, 22, 23, 24|
