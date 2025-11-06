@@ -43,15 +43,42 @@ library (haven)
 library (readstata13)
 library (scales)
 
+## Function to download data files from GitHub
+curl_function <- function(url) {
+  url_pasted <- paste0(
+    "https://raw.githubusercontent.com/CGIAR-SPIA/Viet-Nam-report-2024/main/",
+    url
+  )
+  
+  dir_path <- dirname(url)
+  if (!dir.exists(dir_path)) {
+    dir.create(dir_path, recursive = TRUE)
+  }
+  
+  download.file(url_pasted, destfile = url, mode = "wb")
+}
 
-
+read_from_github <- function(rel_path) {
+  if (!file.exists(rel_path)) curl_function(rel_path)
+  
+  # Detect file extension and choose reader accordingly
+  ext <- tools::file_ext(rel_path)
+  
+  if (ext == "dta") {
+    read.dta13(rel_path)
+  } else if (ext == "csv") {
+    read.csv(rel_path)
+  } else {
+    stop("Unsupported file format: ", ext)
+  }
+}
 # Reach of the CGIAR estimates ----
 
 # a) Innovations in VHLSS 2023 ----
-df_23 <- read.csv("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/VH23_data.csv")
+df_23 <- read_from_github("data/processed/VH23_data.csv")
 
 # ADD CS-MAPs. Later integrate the variable into df_23
-CS <- read.csv("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Non-genetics/CSMAPs.vars.22.23.csv")
+CS <- read_from_github("data/processed/CSMAPs.vars.22.23.csv")
 CS <- CS [CS$panel == 2023 ,] # From 406 to 267 in 2023
 
 CS <- CS[order(CS$MATINH, CS$MAHUYEN, CS$MAXA, CS$MADIABAN, CS$HOSO, -CS$CSMAP_reach), ]
@@ -98,7 +125,7 @@ table (CG.reach.23$sum_CG) # Non adopters, single adopters and multi-adopters
 
 
 # Add weights
-w <- read.dta13 ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS_Household_2023/weight2023.dta")
+w <- read_from_github("data/raw/Weight/VHLSS_2023_weight.dta")
 w$ID <- paste (w$tinh, w$huyen, w$xa, w$diaban, sep='-')
 CG.reach.23$ID <- paste (CG.reach.23$MATINH, CG.reach.23$MAHUYEN, CG.reach.23$MAXA, CG.reach.23$MADIABAN, sep='-')
 
@@ -261,12 +288,12 @@ print(contributions)
 
 # b) Innovations integrated in VHLSS 2022 ----
 
-df_22 <- read.csv("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/VH22_data.csv")
+df_22 <- read_from_github("data/processed/VH22_data.csv")
 CG.reach.22 <- df_22 [, c(1:6,33,17,39,40)]
 
 names(df_22)
 
-w <- read.dta13 ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS_Household_2022/datasets/Weights/wt2022_SPIA.dta")
+w <- read_from_github("data/raw/VHLSS_2022_Household/datasets/Weights/wt2022_SPIA.dta")
 
 w$ID <- paste (w$tinh, w$huyen, w$xa, w$diaban, sep='-')
 CG.reach.22$ID <- paste (CG.reach.22$MATINH, CG.reach.22$MAHUYEN, CG.reach.22$MAXA, CG.reach.22$MADIABAN, sep='-')
@@ -363,6 +390,7 @@ ggplot(data, aes(x = Reach / 1e6, y = reorder(Innovation, Reach, FUN = function(
   theme(legend.position = "none") +
   theme(panel.grid.major = element_line(linetype = "dashed"),
         panel.grid.minor = element_line(linetype = "dashed"))
+
 
 
 
