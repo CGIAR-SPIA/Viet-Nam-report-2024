@@ -226,7 +226,7 @@ df <- left_join (df_23, df_1m5r) #join two dataset
 
 
 df <- df %>%
-  rename (c("strict_1m" = "d_1m5r_certified",
+   dplyr::rename (c("strict_1m" = "d_1m5r_certified",
             "strict_1r" = "d_1m5r_seed_100kg",
             "lenient_1r" = "d_1m5r_seed_120kg"))  #rename vars
 
@@ -321,7 +321,7 @@ plots <- lapply(plot_info, function(info) {
 map_ag_plan <- gridExtra::arrangeGrob(grobs = plots, ncol = 2)
 
 ggsave (plot = map_ag_plan,
-        "Output/Fig_34.png", 
+        "Output/Fig_33.png", 
         width = 6, height = 15, dpi = 1024)
 
 
@@ -380,7 +380,7 @@ plot <- tab_adopt %>%
   ) +
   scale_fill_manual(values = c("Lenient" = "#1c4c6f", "Strict" = "#d95f02"))  # Different colors for criteria
 
-ggsave (plot, filename = "Output/Fig_35.png", width = 10, height = 6, dpi = 1024)
+ggsave (plot, filename = "Output/Fig_34.png", width = 10, height = 6, dpi = 1024)
 
 
 ## Figure 36: Household adoption rates at the province-level for (a) Certified seeds, (b) 1R: Seed rate, (c) 2R: Fertilizer, (d) 3R: Pesticide----
@@ -468,7 +468,7 @@ R3 <- R3 + theme(plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), "cm"))
 
 a <- grid.arrange(OneM, R1, R2, R3, nrow = 2, ncol = 2)
 
-ggsave (a, filename = "Output/Fig_36.png", 
+ggsave (a, filename = "Output/Fig_35.png", 
         height = 15, width = 8, 
         dpi = 1024)
 
@@ -557,7 +557,7 @@ plot_seed_method <- tab_seed_method %>%
 
 plot_seed_method
 
-ggsave (plot_seed_method, filename = "Output/10. 3R3G_figures/plot_seed_method.png", dpi = 1024, height = 6, width = 14)
+ggsave (plot_seed_method, filename = "Output/10. 3R3G_figures/Fig_37.png.png", dpi = 1024, height = 6, width = 14)
 
 
 
@@ -643,7 +643,7 @@ plot_2r_component <- plot_component_fn(tab_2r_component, footnote = "") +  # Pro
   ylim(c(0, 100))  # Ensure y-axis extends from 0 to 100
 
 
-ggsave(plot_2r_component, filename = "Output/Fig_39.png", dpi = 1024,
+ggsave(plot_2r_component, filename = "Output/Fig_38.png", dpi = 1024,
        width = 10, height = 5)
 
 
@@ -726,7 +726,7 @@ plot_3r_component <- plot_component_fn(tab_3r_component, footnote = "") +  # Pro
   ylim(c(0, 100))  # Ensure y-axis extends from 0 to 100
 
 
-ggsave(plot_3r_component, filename = "Output/Fig_40.png", dpi = 1024,
+ggsave(plot_3r_component, filename = "Output/Fig_39.png", dpi = 1024,
        width = 10, height = 5)
 
 ## Average pesticide applications (text only) ----
