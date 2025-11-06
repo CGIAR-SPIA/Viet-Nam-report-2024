@@ -90,7 +90,7 @@ breeding_rice <- read.csv ("data/processed/Rice.vars.VH24.csv") %>%
   mutate (breeding_certified_seed = case_when (M4B113_C7 ==1 ~ 1,
                                                M4B113_C7 ==2 ~ 0,
                                                TRUE ~ NA)) %>%
-  rename (c("breeding_main_variety" = "M4B113_C5",
+  dplyr::rename (c("breeding_main_variety" = "M4B113_C5",
             "breeding_seed_origin" = "M4B113_C8",
             "breeding_seed_duration" = "M4B113_C9")) %>%
   select (-c("Region", "Province_name", "region", "M4B113_C7")) %>%
