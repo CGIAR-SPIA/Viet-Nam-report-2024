@@ -17,6 +17,20 @@ output:
 ---
 ```{r setup, include=FALSE}
 
+# List of required packages
+required_packages <- c("sf", "tidyverse", "haven", "foreign", "readxl", 
+                       "readr", "curl", "httr", "jsonlite", "maditr", "gridExtra")
+
+# Check and install missing packages
+missing_packages <- required_packages[!required_packages %in% installed.packages()[,"Package"]]
+
+if(length(missing_packages) > 0) {
+  cat("Installing missing packages:", paste(missing_packages, collapse = ", "), "\n")
+  install.packages(missing_packages, dependencies = TRUE)
+} else {
+  cat("All required packages are already installed.\n")
+}
+
 library(sf)
 library(tidyverse)
 library(haven)
@@ -28,6 +42,11 @@ library(httr)
 library(jsonlite)
 library(maditr)
 library(gridExtra)
+
+output_dir <- "output"
+if (!dir.exists(output_dir)) {
+  dir.create(output_dir, recursive = TRUE)
+}
 
 
 # Access the CGIAR-SPIA repository and download VHLSS 2022 data integrations
@@ -144,7 +163,7 @@ rm(TS,TS_m,TS_map,HS,HS_m,HS_map,cnHS,cnTS,crs)
 #Tab1[,2:ncol(Tab1)] <- Tab1[,2:ncol(Tab1)]*100
 
 # Create dataset by province
-dat <- read.csv ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Genetics/Rice/Rice.vars.VH24.csv")
+dat <- read.csv(curl("https://raw.githubusercontent.com/CGIAR-SPIA/Viet-Nam-report-2024/main/data/processed/Rice.vars.VH24.csv"))
 
 # Fig A. Maps by variety 
 frequency_table <- table(dat$MATINH, dat$Correct_name.DNA2)
@@ -160,7 +179,7 @@ FigA$MATINH <- as.numeric (as.character(FigA$MATINH))
 FigA$Improved <- 100 - FigA$Landrace
 
 # Fig B. IRRI-related maps - % IRR_related by province
-Years <- read.csv ('C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Genetics/Rice/Rice_Years.csv') 
+Years <- read.csv(curl("https://raw.githubusercontent.com/CGIAR-SPIA/Viet-Nam-report-2024/main/data/processed/Rice_Years.csv"))
 dat <- merge (dat, Years, by.x='Correct_name.DNA2', by.y = 'Name', all.x=TRUE) 
 
 frequency_tableB <- table(dat$MATINH, dat$IRRI_Parentage_dummy)
@@ -232,10 +251,26 @@ dev.off()
 
 ```{r Figure15.wrap, echo=FALSE,fig.asp = 0.8, fig.width = 9, out.width = "100%"}
 
-# Three rice map toguether
+# Three rice map together
 library (gridExtra)
 grid.arrange(M.CG[[1]], M.CG[[2]], M.CG[[3]], ncol = 3)
 
+# Convert to a grob object
+g <- arrangeGrob(
+  M.CG[[1]],
+  M.CG[[2]],
+  M.CG[[3]],
+  ncol = 3
+)
+
+# Save as PNG (or PDF, TIFF, etc.)
+ggsave(
+  filename = file.path(output_dir, "Fig15.png"),
+  plot = g,
+  width = 12,   # increase for better resolution
+  height = 4,
+  dpi = 600
+)
 #names(M.CG)
 #M.CG[[4,5,6,12,15,16,18,19,20]]
 
@@ -262,8 +297,8 @@ grid.arrange(M.CG[[1]], M.CG[[2]], M.CG[[3]], ncol = 3)
 
 #names(All_Innovs)
 
-df_23 <- read.csv("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/VH23_data.csv")
-Provinces_IDs <- read.csv("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS_Household_2022/datasets/Provinces_IDs.csv")
+df_23 <- read.csv(curl("https://raw.githubusercontent.com/CGIAR-SPIA/Viet-Nam-report-2024/main/data/processed/VH23_data.csv"))
+Provinces_IDs <-  read.csv(curl("https://raw.githubusercontent.com/CGIAR-SPIA/Vietnam-pre-report-2023/main/datasets/Provinces_IDs.csv"))
 
 Provinces_IDs$MATINH <- as.numeric (Provinces_IDs$MATINH); df_23$MATINH <- as.numeric (df_23$MATINH)
 df_23 <- merge (df_23, Provinces_IDs, all.x =TRUE)
@@ -321,16 +356,16 @@ AWD.p2 <- modified_map %>%
 
 ```{r Figure17.Saltol, echo=FALSE,fig.asp = 0.8, fig.width = 9, out.width = "100%"}
 
-df_22 <- read.csv("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/VH22_data.csv")
-Provinces_IDs <- read.csv("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS_Household_2022/datasets/Provinces_IDs.csv")
+df_22 <-read.csv(curl("https://raw.githubusercontent.com/CGIAR-SPIA/Viet-Nam-report-2024/main/data/processed/VH22_data.csv"))
+Provinces_IDs <- read.csv(curl("https://raw.githubusercontent.com/CGIAR-SPIA/Vietnam-pre-report-2023/main/datasets/Provinces_IDs.csv"))
 
 Provinces_IDs$MATINH <- as.numeric (Provinces_IDs$MATINH); df_22$MATINH <- as.numeric (df_22$MATINH)
 df_22 <- merge (df_22, Provinces_IDs, all.x =TRUE)
 
 df_22 <- df_22 %>%
   filter(!is.na(Saltol) & !is.na(weight_rice_DNA)) %>% 
-  group_by(MATINH) %>%
-  summarize(
+  dplyr::group_by(MATINH) %>%
+  dplyr::summarize(
     Pctn.saltol = sum((Saltol == 1) * weight_rice_DNA) / sum(weight_rice_DNA) * 100
 )
 
@@ -355,7 +390,7 @@ Saltol.map <- modified_map %>%
         axis.text.y = element_blank(),
         axis.ticks = element_blank()) 
   
-
+ggsave(Saltol.map, filename = file.path(output_dir, "Fig17.spatial.png"), dpi = 1024)
 ```
 
 
@@ -365,16 +400,16 @@ Saltol.map <- modified_map %>%
 
 # Figure 35: Household adoption rates at the province-level for (a) Certified seeds, (b) 1R: Seed rate, (c) 2R: Fertilizer, (d) 3R: Pesticide 
 
-df <- read.csv("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/Report 2024/Reproducible Scripts/Output/VH23_data.csv")
-Provinces_IDs <- read.csv("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS_Household_2022/datasets/Provinces_IDs.csv")
+df <- read.csv(curl("https://raw.githubusercontent.com/CGIAR-SPIA/Viet-Nam-report-2024/main/data/processed/VH23_data.csv"))
+Provinces_IDs <- read.csv(curl("https://raw.githubusercontent.com/CGIAR-SPIA/Vietnam-pre-report-2023/main/datasets/Provinces_IDs.csv"))
 
 Provinces_IDs$MATINH <- as.numeric (Provinces_IDs$MATINH); df$MATINH <- as.numeric (df$MATINH)
 df <- merge (df, Provinces_IDs, all.x =TRUE)
 
 df <- df %>%
   #filter(!is.na(weight_final_rice)) %>% 
-  group_by(MATINH) %>%
-  summarize(
+  dplyr::group_by(MATINH) %>%
+  dplyr::summarize(
    lenient_1m = sum((lenient_1m == 1) * weight_final_rice, na.rm = TRUE) / sum(weight_final_rice, na.rm = TRUE) * 100,
     lenient_1r = sum((d_1m5r_seed_120kg == 1) * weight_final_rice, na.rm = TRUE) / sum(weight_final_rice, na.rm = TRUE) * 100,
     lenient_2r = sum((lenient_2r == 1) * weight_final_rice, na.rm = TRUE) / sum(weight_final_rice, na.rm = TRUE) * 100,
@@ -457,8 +492,7 @@ R3 <- R3 + theme(plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), "cm"))
 
 a <- grid.arrange(OneM, R1, R2, R3, nrow = 2, ncol = 2)
 
-ggsave (a, filename = "C:/Users/FKosmowski/OneDrive - CGIAR/DocumentsRedirected/2023 Activities/VH24 report/Visuals/Fig38.spatial.png", dpi = 1024)
-
+ggsave(a, filename = file.path(output_dir, "Fig35.spatial.png"), dpi = 1024)
 
 
 
@@ -467,21 +501,27 @@ names(modified_map)
 
 # Figure 33: Vietnamese provinces referencing 1M5R/3R3G components in agricultural plans  ----
 
-ag_plan <- read_excel ("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/Non-genetics/ag_plan_1m5r_recode.xlsx") #load ag_plan data
+# Read Excel file from GitHub 
+temp_file <- tempfile(fileext = ".xlsx")
+download.file("https://raw.githubusercontent.com/CGIAR-SPIA/Viet-Nam-report-2024/main/data/processed/ag_plan_1m5r_recode.xlsx", 
+              destfile = temp_file, 
+              mode = "wb")  # 'wb' = write binary, required for Excel files
+ag_plan <- read_excel(temp_file)
+unlink(temp_file)  # Clean up temp file
 
 ag_plan <- ag_plan %>%
   mutate (package = case_when (mention_1M5R == 1 | mention_3R3G == 1 ~ 1,
                                mention_1M5R == 0 & mention_3R3G == 0 ~ 0,
                                TRUE ~ NA))  #recode variable
 
-Provinces_IDs <- read.csv("C:/Users/FKosmowski/SPIA Dropbox/SPIA General/SPIA 2019-2024/5. OBJ.3-Data collection/Country teams/Vietnam/DATA/VHLSS_Household_2022/datasets/Provinces_IDs.csv")
+Provinces_IDs <- read.csv(curl("https://raw.githubusercontent.com/CGIAR-SPIA/Vietnam-pre-report-2023/main/datasets/Provinces_IDs.csv"))
 Provinces_IDs$MATINH <- as.numeric (Provinces_IDs$MATINH); ag_plan$MATINH <- as.numeric (ag_plan$MATINH)
 ag_plan <- merge (ag_plan, Provinces_IDs, all.x =TRUE)
 
 
 ag_plan <- ag_plan %>%
-  group_by(Province, Year) %>%
-  summarize (
+  dplyr::group_by(Province, Year) %>%
+  dplyr::summarize (
     MATINH = first(MATINH),
     package_prv = case_when (mean(package) > 0 ~ 1,
                              mean(package) == 0 ~ 0),
@@ -532,10 +572,6 @@ plot_info <- list(
 )
 
 
-
-library(ggplot2)
-library(sf)
-
 create_plot <- function(sf_data, fill_var, plot_title) {
   ggplot(sf_data) +
     geom_sf(aes(fill = factor(.data[[fill_var]], levels = c(1,0))), 
@@ -579,10 +615,8 @@ ordered_plots <- list(plots[[1]], plots[[3]], plots[[5]], plots[[7]],
 # Use wrap_plots to stack them into two columns (down columns)
 final_plot <- wrap_plots(ordered_plots, ncol = 4)
 
-ggsave (plot = final_plot,
-        "C:/Users/FKosmowski/OneDrive - CGIAR/DocumentsRedirected/2023 Activities/VH24 report/Visuals/Fig36.png", 
-        width = 15, height = 6, dpi = 1024)
-
+ggsave(plot = final_plot, filename = file.path(output_dir, "Fig33.spatial.png"), 
+       width = 15, height = 6, dpi = 1024)
 
 
 ```
