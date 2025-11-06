@@ -136,8 +136,8 @@ pfes <- format_ID(pfes, columns = c("MATINH", "MAHUYEN", "MAXA"), widths = c(2,3
 
 curl_function ("data/raw/Weight/Census_household_communelevel_clean.csv")
 n_hh_pop <- read.csv ("data/raw/Weight/Census_household_communelevel_clean.csv") %>%
-  select (c(MATINH, MAXA, n_hh)) %>%
-  rename (n_hh_pop = n_hh) 
+   dplyr::select (c(MATINH, MAXA, n_hh)) %>%
+   dplyr::rename (n_hh_pop = n_hh) 
 #merge by Commune ID (MAXA) because of some administrative change 
 # (486 missing if merge by prov, dist, comm ID --> 470 missing if merge by prov and comm ID)
 
@@ -227,6 +227,6 @@ pfes_map_area <- modified_map %>%
 
 pfes_map_area
 
-ggsave (pfes_map_area, filename = "Figure 24b.png",
+ggsave (pfes_map_area, filename = "Output/Figure 24b.png",
         width = 6, height = 10, dpi = 1024)
 
