@@ -22,13 +22,13 @@ Section | Description| Script | Output |
 |3. Methods and Data|Overview of socio-economic variables|[Table 5](script/Table%205.R)|Table 5|
 |4. Overview of Results|Adoption rate|[Table 7](script/Table%207.R)|Table 7|
 |4. Overview of Results|Adoption rate by region|[Table 8](script/Table%208.R)|Table 8|
-|4. Overview of Results|OLS results|[Table 9](script/Table%209.R)|Table 9; Figures 13, 17, 27, 29, 31, 33, 37, 42, and 47; Appendix E|
-|5. Aquaculture|Section results |[Aquaculture](script/5.%20Aquaculture.R)|Tables 10, 11; Figures 8, 11, 12 |
-|6. Breeding Innovations|Section results |[Breeding Innovations](script/6.%20Breeding%20Innov.R)|Tables 13, 15, 16; Figures 15, 16, 18|
-|7. Climate Change Adaptation Options|Section results|[CC adaptation](script/7.%20CC%20adaptation.R)|Tables 17, 18, 20; Figures 21, 22, 23, 24|
-|8. Environmental Conservation|Section results|[Environment](script/8.%20Environment.R)|Figures 25a,b|
-|9. Mechanisation|Section results|[Mechanisation](script/9.%20Mechanization.R)|Figures 26, 28, 30, 32|
-|10. Sustainable Intensification Practices|Section results|[SI practices](script/10.%20SI%20practices.R)|Table 21, Figures 34, 35, 36, 38, 39, 40, 46|
+|4. Overview of Results|OLS results|[Table 9](script/Table%209.R)|Table 9; Figures 12, 16, 26, 28, 30, 32, 36, 41, 44, and 46; Appendix E|
+|5. Aquaculture|Section results |[Aquaculture](script/5.%20Aquaculture.R)|Tables 10, 11; Figures 8, 10, 11 |
+|6. Breeding Innovations|Section results |[Breeding Innovations](script/6.%20Breeding%20Innov.R)|Tables 13, 15, 16; Figures 14|
+|7. Climate Change Adaptation Options|Section results|[CC adaptation](script/7.%20CC%20adaptation.R)|Tables 17, 18, 20; Figures 20, 21, 22, 23|
+|8. Environmental Conservation|Section results|[Environment](script/8.%20Environment.R)|Figures 24a,b|
+|9. Mechanisation|Section results|[Mechanisation](script/9.%20Mechanization.R)|Figures 29 , 31|
+|10. Sustainable Intensification Practices|Section results|[SI practices](script/10.%20SI%20practices.R)|Table 21, Figures 33, 34, 35, 37, 38, 39|
 |Appendix B|Dataset with calculated weights|[Weights](https://github.com/CGIAR-SPIA/Viet-Nam-report-2024/blob/main/script/Report_weights.R)|[Weights dataset](Output/Report_weights.csv)|
 
 # Software Implementation:
