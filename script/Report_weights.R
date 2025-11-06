@@ -164,8 +164,8 @@ pred_n_coffee_2023 <- n_coffee_2020 * (1 + increase_rate_annual_coffee)^3
 curl_function (url = "data/raw/Weight/rice_household_clean.csv")
 
 n_rice_pop <- read.csv ("data/raw/Weight/rice_household_clean.csv") %>%
-  select (MATINH, MAXA, n_rice_hh) %>%
-  rename (n_rice_pop = n_rice_hh) #merge by Commune ID (MAXA) because of some administrative change
+  dplyr::select (MATINH, MAXA, n_rice_hh) %>%
+  dplyr::rename (n_rice_pop = n_rice_hh) #merge by Commune ID (MAXA) because of some administrative change
 
 n_rice_pop <- format_ID(n_rice_pop, columns = c("MATINH", "MAXA"), widths = c(2, 5))
 
@@ -175,8 +175,8 @@ curl_function (url = "data/raw/Weight/Census_household_communelevel_clean.csv")
 
 
 n_hh_pop <- read.csv ("data/raw/Weight/Census_household_communelevel_clean.csv") %>%
-  select (c(MATINH, MAXA, n_hh)) %>%
-  rename (n_hh_pop = n_hh) 
+  dplyr::select (c(MATINH, MAXA, n_hh)) %>%
+  dplyr::rename (n_hh_pop = n_hh) 
 #merge by Commune ID (MAXA) because of some administrative change 
 # (486 missing if merge by prov, dist, comm ID --> 470 missing if merge by prov and comm ID)
 
@@ -574,7 +574,7 @@ gift_df$MADIABAN[is.na(gift_df$MADIABAN)] <- "005"
 
 gift_final <- gift_df %>%
   left_join (wt_2023) %>%
-  rename (weight_gift = wt45) %>%
+  dplyr::rename (weight_gift = wt45) %>%
   select (c(MATINH, MAXA, MADIABAN, weight_gift)) %>%
   mutate (panel = 2023) %>%
   distinct()
