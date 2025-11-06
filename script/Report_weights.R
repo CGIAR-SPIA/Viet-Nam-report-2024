@@ -43,7 +43,7 @@ rm(list = ls()) #start clean
 
 getwd() #get current working directory
 
-setwd("YOUR_DESTINATION") #change working directory if needed
+#setwd("YOUR_DESTINATION") #change working directory if needed
 
 
 # 1. Install and load packages ----
