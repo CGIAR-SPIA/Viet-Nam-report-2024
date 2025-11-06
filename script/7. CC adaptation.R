@@ -18,7 +18,7 @@ rm (list = ls()) #start clean
 # Function to check and install packages
 
 packages <- c("tidyverse", "cowplot", "gridExtra", "httr", "readxl", "e1071",
-              "estimatr", "jtools", "haven", "summarytools")
+              "estimatr", "jtools", "haven", "summarytools","openxlsx")
 
 check_and_install_package <- function(package_name) {
   if (!requireNamespace(package_name, quietly = TRUE)) {
@@ -39,6 +39,7 @@ library (estimatr)
 library (jtools)
 library (haven)
 library (summarytools)
+library (openxlsx)
 
 # Function to curl data from GitHub----
 # Curl without token:
@@ -939,7 +940,7 @@ VH_merged$CSMAP_reach <- ifelse (VH_merged$CS_reach_WS == TRUE | VH_merged$CS_re
 table (VH_merged$CSMAP_reach)
 
 CS <- VH_merged %>%
-  rename(
+  dplyr::rename(
     MAHUYEN = MAHUYEN.y,
     MATINH = MATINH.y,
     MAXA = MAXA,
