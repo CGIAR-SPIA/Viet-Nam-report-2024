@@ -91,7 +91,7 @@ df_23$IDHO <- paste0 (df_23$MAXA, df_23$MADIABAN, df_23$HOSO)
 
 
 df_23 <- df_23 %>%
-  rename ("mech_row_seeder" = "mech_row_drum_seeder")
+  dplyr::rename ("mech_row_seeder" = "mech_row_drum_seeder")
 
 df <- full_join (df_22, df_23)
 
@@ -114,7 +114,7 @@ pfes <- format_ID(pfes, columns = c("MATINH", "MAHUYEN", "MAXA"), widths = c(2,3
 curl_function ("data/raw/Weight/Census_household_communelevel_clean.csv")
 n_hh_pop <- read.csv ("data/raw/Weight/Census_household_communelevel_clean.csv") %>%
   select (c(MATINH, MAXA, n_hh)) %>%
-  rename (n_hh_pop = n_hh) 
+  dplyr::rename (n_hh_pop = n_hh) 
 #merge by Commune ID (MAXA) because of some administrative change 
 # (486 missing if merge by prov, dist, comm ID --> 470 missing if merge by prov and comm ID)
 
@@ -455,7 +455,7 @@ tab_combine <- full_join (tab_adoption_rice, tab_adoption_dna) %>%
   full_join (tab_adoption_coffee) %>%
   # full_join (tab_adoption_pfes) %>%
   full_join (tab_adoption_ea) %>%
-  rename (var = ".id") %>%
+  dplyr::rename (var = ".id") %>%
   mutate (adopt_hh = case_when (n_sub >= 30 ~ adoption,
                                 n_sub <30 ~ NA)) %>%
   mutate (adopt_EA = case_when (var == "pfes_dummy" ~ pct_adopt_EA,
