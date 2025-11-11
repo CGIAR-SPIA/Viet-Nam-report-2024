@@ -557,7 +557,7 @@ plot_seed_method <- tab_seed_method %>%
 
 plot_seed_method
 
-ggsave (plot_seed_method, filename = "Output/10. 3R3G_figures/Fig_37.png.png", dpi = 1024, height = 6, width = 14)
+ggsave (plot_seed_method, filename = "Output/Fig_37.png.png", dpi = 1024, height = 6, width = 14)
 
 
 
