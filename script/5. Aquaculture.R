@@ -140,11 +140,11 @@ ggplot(data, aes(x = Year, y = Values)) +
 
 # Figure 11. Map of Sampled Tilapia Households and Hatcheries in 2023 ----
 
-curl_function ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE.csv")
-HH <- read.csv ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE.csv")
+curl_function ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE_anonymized.csv")
+HH <- read.csv ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE_anonymized.csv")
 
-curl_function ("data/raw/Genetics/Tilapia/HatcheriesModule_WIDE.csv")
-Ha <- read.csv ("data/raw/Genetics/Tilapia/HatcheriesModule_WIDE.csv")
+curl_function ("data/raw/Genetics/Tilapia/HatcheriesModule_WIDE_anonymized.csv")
+Ha <- read.csv ("data/raw/Genetics/Tilapia/HatcheriesModule_WIDE_anonymized.csv")
 
 Ha <- Ha [complete.cases(Ha$S_Q1.Longitude_1, Ha$S_Q1.Latitude_1), ] # 98/101
 HH <- HH [complete.cases(HH$S_Q1.Longitude_1, HH$S_Q1.Latitude_1), ] # 215/231
@@ -171,8 +171,8 @@ ggplot() +
 
 # Table 10. Characteristics of tilapia-farming households in Vietnam ----
 
-curl_function ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE.csv")
-HH <- read.csv ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE.csv")
+curl_function ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE_anonymized.csv")
+HH <- read.csv ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE_anonymized.csv")
 HH <- HH %>%
   dplyr::rename (c("MATINH" = "hhidprovince",
             "MAHUYEN" = "hhiddistrict",
@@ -460,8 +460,8 @@ table (Ha$R_Q7_1)
 # Figure 12. Map of tilapia strain assignments on three different samples: (a) all tilapia-farming households (n=204), (b) households that purchased fingerlings in the last 3 years (n=62), and (c) hatcheries (n=89) ----
 
 # Map C. Strain by hatcheries
-curl_function("data/raw/Genetics/Tilapia/HatcheriesModule_WIDE.csv")
-Ha <- read.csv ("data/raw/Genetics/Tilapia/HatcheriesModule_WIDE.csv")
+curl_function("data/raw/Genetics/Tilapia/HatcheriesModule_WIDE_anonymized.csv")
+Ha <- read.csv ("data/raw/Genetics/Tilapia/HatcheriesModule_WIDE_anonymized.csv")
 
 curl_function("data/raw/Genetics/Tilapia/Hatch.vars.csv")
 Ha.DNA <- read.csv ("data/raw/Genetics/Tilapia/Hatch.vars.csv") # See l.840 for sourcing
@@ -498,8 +498,8 @@ FigC
 curl_function("data/raw/Genetics/Tilapia/GIFT.vars.VH24.csv")
 GIFT <- read.csv ('data/raw/Genetics/Tilapia/GIFT.vars.VH24.csv')
 
-curl_function ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE.csv")
-HH <- read.csv ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE.csv")
+curl_function ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE_anonymized.csv")
+HH <- read.csv ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE_anonymized.csv")
 
 HH <- merge (HH [, c(1,2,3,5,15,223,224)], GIFT, by = c("SubmissionDate", "start", "end", "deviceid"), all.y=TRUE)
 
@@ -534,8 +534,8 @@ FigA <- ggplot() +
 # Run previous lines to have 'HH'
 
 # Data 1; DEPOCEN-SPIA survey (n=204)
-curl_function ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE.csv")
-HH <- read.csv ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE.csv")
+curl_function ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE_anonymized.csv")
+HH <- read.csv ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE_anonymized.csv")
 
 HH <- HH %>%
   rename (c("MATINH" = "hhidprovince",
