@@ -143,14 +143,14 @@ ggplot(data, aes(x = Year, y = Values)) +
 curl_function ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE_anonymized.csv")
 HH <- read.csv ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE_anonymized.csv")
 
-curl_function ("data/raw/Genetics/Tilapia/HatcheriesModule_WIDE_anonymized.csv")
-Ha <- read.csv ("data/raw/Genetics/Tilapia/HatcheriesModule_WIDE_anonymized.csv")
+curl_function ("data/raw/Genetics/Tilapia/hatchery_data_anonymized.csv")
+Ha <- read.csv ("data/raw/Genetics/Tilapia/hatchery_data_anonymized.csv")
 
-Ha <- Ha [complete.cases(Ha$S_Q1.Longitude_1, Ha$S_Q1.Latitude_1), ] # 98/101
-HH <- HH [complete.cases(HH$S_Q1.Longitude_1, HH$S_Q1.Latitude_1), ] # 215/231
+Ha <- Ha [complete.cases(Ha$S_Q1.Longitude_anonymized, Ha$S_Q1.Latitude_anonymized), ] # 98/101
+HH <- HH [complete.cases(HH$S_Q1.Longitude_anonymized, HH$S_Q1Latitude_anonymized), ] # 215/231
 
-Ha_sf <- st_as_sf(data.frame(longitude = Ha$S_Q1.Longitude_1, latitude = Ha$S_Q1.Latitude_1), coords = c("longitude", "latitude"))
-HH_sf <- st_as_sf(data.frame(longitude = HH$S_Q1.Longitude_1, latitude = HH$S_Q1.Latitude_1), coords = c("longitude", "latitude"))
+Ha_sf <- st_as_sf(data.frame(longitude = Ha$S_Q1.Longitude_anonymized, latitude =Ha$S_Q1.Latitude_anonymized), coords = c("longitude", "latitude"))
+HH_sf <- st_as_sf(data.frame(longitude = HH$S_Q1.Longitude_anonymized, latitude = HH$S_Q1.Latitude_anonymized), coords = c("longitude", "latitude"))
 
 st_crs(Ha_sf) <- st_crs(HH_sf) <- st_crs(modified_map) <- st_crs("+proj=longlat")
 
@@ -400,8 +400,8 @@ summary_table
 write.csv(summary_table, "Output/Tab10.csv", row.names = FALSE)
 
 # Hatchery characteristics (text-only)
-curl_function ("data/raw/Genetics/Tilapia/Hatch_anonymised.csv")
-Ha <- read.csv ("data/raw/Genetics/Tilapia/Hatch_anonymised.csv")
+curl_function ("data/raw/Genetics/Tilapia/hatchery_data_anonymized.csv")
+Ha <- read.csv ("data/raw/Genetics/Tilapia/hatchery_data_anonymized.csv")
 
 curl_function ("data/raw/VHLSS_2022_Household/datasets/Provinces_IDs.csv")
 Provinces_IDs <- read.csv("data/raw/VHLSS_2022_Household/datasets/Provinces_IDs.csv")
@@ -433,7 +433,11 @@ Ha$R_Q8c_1 [is.na (Ha$R_Q8c_1)] <- 0
 table (Ha$R_Q8c_1) 
 mean (Ha$R_Q8c_1) # These who sell to other hatcheries sell 34% on average
 
-by (Ha$R_Q8c_1, Ha$Region, mean, na.rm=TRUE)
+# RENAME region.y = region
+names(Ha)[names(Ha) == "Region.y"] <- "Region"
+
+# Then use the simpler syntax
+aggregate(R_Q8c_1 ~ Region, data = Ha, FUN = mean, na.rm = TRUE)
 mean (Ha$R_Q8b_1 == 'option_1'); sd (Ha$R_Q8b_1== 'option_1')
 
 # Origin of fingerlings is from the same province
@@ -460,39 +464,39 @@ table (Ha$R_Q7_1)
 # Figure 12. Map of tilapia strain assignments on three different samples: (a) all tilapia-farming households (n=204), (b) households that purchased fingerlings in the last 3 years (n=62), and (c) hatcheries (n=89) ----
 
 # Map C. Strain by hatcheries
-curl_function("data/raw/Genetics/Tilapia/HatcheriesModule_WIDE_anonymized.csv")
-Ha <- read.csv ("data/raw/Genetics/Tilapia/HatcheriesModule_WIDE_anonymized.csv")
+curl_function("data/raw/Genetics/Tilapia/hatchery_data_anonymized.csv")
+Ha <- read.csv ("data/raw/Genetics/Tilapia/hatchery_data_anonymized.csv")
 
 curl_function("data/raw/Genetics/Tilapia/Hatch.vars.csv")
 Ha.DNA <- read.csv ("data/raw/Genetics/Tilapia/Hatch.vars.csv") # See l.840 for sourcing
-# Note: imported from previous section
-
-Ha <- merge (Ha [, c(11,98,99)], Ha.DNA, by = 'I_Q2', all.y=TRUE);
-Ha <- Ha [complete.cases(Ha$S_Q1.Longitude_1, Ha$S_Q1.Latitude_1), ]
-
-Ha$S1_Strain <- ifelse (Ha$S1_Strain == 'RIA1', 'RIA1 lineage', 
-                        ifelse (Ha$S1_Strain == '03_BEST', 'BEST', 
-                                ifelse (Ha$S1_Strain == 'GenoMAR Gain', 'GenoMar Gain', Ha$S1_Strain)))
-
-desired_order <- c('RIA1 lineage', 'BEST', 'Molobicus', 'GenoMar Gain'); Ha$S1_Strain <- factor(Ha$S1_Strain, levels = desired_order)
-
-Ha_sf <- st_as_sf(data.frame(longitude = Ha$S_Q1.Longitude_1, latitude = Ha$S_Q1.Latitude_1), coords = c("longitude", "latitude"))
-st_crs(Ha_sf) <- st_crs(modified_map) <- st_crs("+proj=longlat")
-
-FigC <- ggplot() +
-  geom_sf(data = modified_map, fill = "white", color = "black") +
-  geom_sf(data = Ha_sf, aes(color = Ha$S1_Strain), size = 2.5) +
-  ggtitle("(c) Hatcheries") +
-  scale_color_manual(name = "Tilapia strains",
-                     values = c("RIA1 lineage" = "dodgerblue",
-                                "BEST" = "forestgreen",
-                                "Molobicus" = "darkorange",
-                                "O. Mossambicus" = "firebrick",
-                                'GenoMar Gain' = 'darkorchid1',
-                                "Unassigned" = "grey")) +
-  theme(plot.title = element_text(hjust = 0.5, vjust = 3), legend.position = "bottom")  # Position legend at the bottom
-
-FigC
+# # Note: imported from previous section
+# 
+# Ha <- merge (Ha [, c(11,185,186)], Ha.DNA, by = 'I_Q2', all.y=TRUE);
+# Ha <- Ha [complete.cases(Ha$S_Q1.Longitude_anonymized, Ha$S_Q1.Latitude_1), ]
+# 
+# Ha$S1_Strain <- ifelse (Ha$S1_Strain == 'RIA1', 'RIA1 lineage', 
+#                         ifelse (Ha$S1_Strain == '03_BEST', 'BEST', 
+#                                 ifelse (Ha$S1_Strain == 'GenoMAR Gain', 'GenoMar Gain', Ha$S1_Strain)))
+# 
+# desired_order <- c('RIA1 lineage', 'BEST', 'Molobicus', 'GenoMar Gain'); Ha$S1_Strain <- factor(Ha$S1_Strain, levels = desired_order)
+# 
+# Ha_sf <- st_as_sf(data.frame(longitude = Ha$S_Q1.Longitude_anonymized, latitude = Ha$S_Q1.Latitude_anonymized), coords = c("longitude", "latitude"))
+# st_crs(Ha_sf) <- st_crs(modified_map) <- st_crs("+proj=longlat")
+# 
+# FigC <- ggplot() +
+#   geom_sf(data = modified_map, fill = "white", color = "black") +
+#   geom_sf(data = Ha_sf, aes(color = Ha$S1_Strain), size = 2.5) +
+#   ggtitle("(c) Hatcheries") +
+#   scale_color_manual(name = "Tilapia strains",
+#                      values = c("RIA1 lineage" = "dodgerblue",
+#                                 "BEST" = "forestgreen",
+#                                 "Molobicus" = "darkorange",
+#                                 "O. Mossambicus" = "firebrick",
+#                                 'GenoMar Gain' = 'darkorchid1',
+#                                 "Unassigned" = "grey")) +
+#   theme(plot.title = element_text(hjust = 0.5, vjust = 3), legend.position = "bottom")  # Position legend at the bottom
+# 
+# FigC
 
 # Map A. Strain by households 
 curl_function("data/raw/Genetics/Tilapia/GIFT.vars.VH24.csv")
@@ -501,9 +505,9 @@ GIFT <- read.csv ('data/raw/Genetics/Tilapia/GIFT.vars.VH24.csv')
 curl_function ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE_anonymized.csv")
 HH <- read.csv ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE_anonymized.csv")
 
-HH <- merge (HH [, c(1,2,3,5,15,223,224)], GIFT, by = c("SubmissionDate", "start", "end", "deviceid"), all.y=TRUE)
+HH <- merge (HH [, c(1,2,3,5,15,308,309)], GIFT, by = c("SubmissionDate", "start", "end", "deviceid"), all.y=TRUE)
 
-HH <- HH [complete.cases(HH$S_Q1.Longitude_1, HH$S_Q1.Latitude_1), ]
+HH <- HH [complete.cases(HH$S_Q1.Longitude_anonymized, HH$S_Q1.Latitude_anonymized), ]
 
 HH$Strain <- ifelse (HH$Strain == 'RIA1', 'RIA1 lineage', 
                      ifelse (HH$Strain == '03_BEST', 'BEST',
@@ -513,12 +517,18 @@ HH$Strain <- ifelse (HH$Strain == 'RIA1', 'RIA1 lineage',
 desired_order <- c('RIA1 lineage', 'BEST', 'Molobicus', 'O. Mossambicus', 'Unassigned')
 HH$Strain <- factor(HH$Strain, levels = desired_order)
 
-HH_sf <- st_as_sf(data.frame(longitude = HH$S_Q1.Longitude_1, latitude = HH$S_Q1.Latitude_1), coords = c("longitude", "latitude"))
+#HH_sf <- st_as_sf(data.frame(longitude = HH$S_Q1.Longitude_anonymized, latitude = HH$S_Q1.Latitude_anonymized), coords = c("longitude", "latitude"))
+HH_sf <- st_as_sf(
+  HH[, c("S_Q1.Longitude_anonymized", "S_Q1.Latitude_anonymized", "Strain")],
+  coords = c("S_Q1.Longitude_anonymized", "S_Q1.Latitude_anonymized"),
+  crs = 4326
+)
+
 st_crs(HH_sf) <- st_crs(modified_map) <- st_crs("+proj=longlat")
 
 FigA <- ggplot() +
   geom_sf(data = modified_map, fill = "white", color = "black") +
-  geom_sf(data = HH_sf, aes (color = HH$Strain), size = 2.5) +
+  geom_sf(data = HH_sf, aes(color = Strain), size = 2.5) +
   ggtitle("(a) All households") +
   scale_color_manual(name = "Tilapia strains",
                      values = c("RIA1 lineage" = "dodgerblue",
@@ -526,11 +536,12 @@ FigA <- ggplot() +
                                 "Molobicus" = "darkorange",
                                 "O. Mossambicus" = "firebrick",
                                 "Unassigned" = "grey")) +
-  theme(plot.title = element_text(hjust = 0.5, vjust = 3), legend.position = "bottom")  # Position legend at the bottom
+  theme(plot.title = element_text(hjust = 0.5, vjust = 3),
+        legend.position = "bottom")
 
 
 # Map B. Strain by purchasing-households 
-#HH <- read.csv ("C:/Users/FKosmowski/OneDrive - CGIAR/DocumentsRedirected/2023 Activities/D. GIFT Experiment/Data/Final datasets/HouseholdModule_WIDE.csv")
+#HH <- read.csv ("C:/Users/FKosmowski/OneDrive - CGIAR/DocumentsRedirected/2023 Activities/D. GIFT Experiment/Data/Final datasets/HouseholdModule_WIDE_anonymized.csv")
 # Run previous lines to have 'HH'
 
 # Data 1; DEPOCEN-SPIA survey (n=204)
@@ -547,7 +558,7 @@ HH <- merge (HH, GIFT , by=c("SubmissionDate", "start", "end", "deviceid"), all.
 HH$Purchased <- ifelse (HH$T_Q2_1.x == 'option_1' | HH$T_Q2_1.x == 'option_2' | HH$T_Q2_1.x == 'option_8', FALSE, TRUE)
 table (HH$Purchased) # Correct n=62
 
-HH_purch <- HH [complete.cases(HH$S_Q1.Longitude_1, HH$S_Q1.Latitude_1) & HH$Purchased == TRUE, ] 
+HH_purch <- HH [complete.cases(HH$S_Q1.Longitude_anonymized, HH$S_Q1.Latitude_anonymized) & HH$Purchased == TRUE, ] 
 
 HH_purch$Strain <- ifelse (HH_purch$Strain == 'RIA1', 'RIA1 lineage', 
                            ifelse (HH_purch$Strain == '03_BEST', 'BEST',
@@ -558,7 +569,7 @@ desired_order <- c('RIA1 lineage', 'BEST', 'Molobicus', 'O. Mossambicus', 'Unass
 HH_purch$Strain <- factor(HH_purch$Strain, levels = desired_order)
 
 
-HH_purch_sf <- st_as_sf(data.frame(longitude = HH_purch$S_Q1.Longitude_1, latitude = HH_purch$S_Q1.Latitude_1), coords = c("longitude", "latitude"))
+HH_purch_sf <- st_as_sf(data.frame(longitude = HH_purch$S_Q1.Longitude_anonymized, latitude = HH_purch$S_Q1.Latitude_anonymized), coords = c("longitude", "latitude"))
 st_crs(HH_purch_sf) <- st_crs(modified_map) <- st_crs("+proj=longlat")
 
 FigB  <- ggplot() +
@@ -578,6 +589,6 @@ FigB
 # Note: Legends are turned off and some plot, and graphically rearranged later
 
 library (gridExtra)
-grid.arrange(FigA, FigB, FigC, ncol = 3)
+grid.arrange(FigA, FigB, ncol = 2) #ADD FigC, 
 
 
