@@ -2,7 +2,7 @@
 
 # ---
 # Title: "Section 5. Aquaculture and Capture Fisheries"
-# Author email: "f,kosmowski@cgiar.org", "b.thanh@contractors.irri.org"
+# Author email: "f,kosmowski@cgiar.org", "b.thanh@contractors.irri.org", "M.Kirinyet@cgiar.org"
 # Date: "October 2024"
 # ---
 
@@ -41,7 +41,7 @@ library (reshape)
 library (reshape2)
 library (stringr)
 library (gridExtra)
-
+library(lubridate)
 
 # Function to format ID values
 
@@ -56,7 +56,6 @@ format_ID <- function(df, columns, widths, pad_char = "0") {
   }
   return(df)
 }
-
 
 # Define columns and widths
 columns <- c("MATINH", "MAHUYEN", "MAXA", "MADIABAN", "HOSO")
@@ -165,19 +164,15 @@ ggplot() +
   theme_minimal() + 
   theme(plot.title = element_text(hjust = 0.5)) 
 
-
-
-
-
 # Table 10. Characteristics of tilapia-farming households in Vietnam ----
 
 curl_function ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE_anonymized.csv")
 HH <- read.csv ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE_anonymized.csv")
 HH <- HH %>%
   dplyr::rename (c("MATINH" = "hhidprovince",
-            "MAHUYEN" = "hhiddistrict",
-            "MAXA" = "hhidcommune",
-            "HOSO" = "HH_ID"))
+                   "MAHUYEN" = "hhiddistrict",
+                   "MAXA" = "hhidcommune",
+                   "HOSO" = "HH_ID"))
 HH <- format_ID (HH, columns = c("MATINH", "MAHUYEN", "MAXA", "HOSO"), widths = c(2,3,5,3))
 
 
@@ -257,7 +252,7 @@ V1b_mean <-sum(Ho_Muc4B51A_filt$S_Q0b_1 [Ho_Muc4B51A_filt$S_Q0b_1 != 99]* Ho_Muc
   sum(Ho_Muc4B51A_filt$wt45[!is.na(Ho_Muc4B51A_filt$S_Q0b_1) & !is.na (Ho_Muc4B51A_filt$wt45)])
 
 V1b_sd <- sqrt(sum(Ho_Muc4B51A_filt$wt45 [Ho_Muc4B51A_filt$S_Q0b_1 != 99] * (Ho_Muc4B51A_filt$S_Q0b_1 [Ho_Muc4B51A_filt$S_Q0b_1 != 99] - V1b_mean)^2, na.rm = TRUE) / 
-      sum(Ho_Muc4B51A_filt$wt45[!is.na(Ho_Muc4B51A_filt$S_Q0b_1) & !is.na (Ho_Muc4B51A_filt$wt45)]))
+                 sum(Ho_Muc4B51A_filt$wt45[!is.na(Ho_Muc4B51A_filt$S_Q0b_1) & !is.na (Ho_Muc4B51A_filt$wt45)]))
 
 
 # 1.C Experience of tilapia farming
@@ -348,9 +343,9 @@ mean (Ho_Muc4B51A_filt$T_Q11b_1 [Ho_Muc4B51A_filt$Purchased == TRUE], na.rm=TRUE
 
 # 3.C Quantity at stocking (in 1,000)
 Ho_Muc4B51A_filt$T_Q9_1_rec <- ifelse (Ho_Muc4B51A_filt$T_Q9a_1 == 'option_3', Ho_Muc4B51A_filt$T_Q9_1*10000, 
-                         ifelse (Ho_Muc4B51A_filt$T_Q9a_1 == 'option_2', Ho_Muc4B51A_filt$T_Q9_1*1000, 
-                                 ifelse (Ho_Muc4B51A_filt$T_Q9a_1 == 'option_1', Ho_Muc4B51A_filt$T_Q9_1*1, 
-                                         ifelse (Ho_Muc4B51A_filt$T_Q9a_1 == 'option_4', Ho_Muc4B51A_filt$T_Q9_1*900, Ho_Muc4B51A_filt$T_Q9_1)))) # Assumes / 3 cm: 800-1000 fishes/ kg
+                                       ifelse (Ho_Muc4B51A_filt$T_Q9a_1 == 'option_2', Ho_Muc4B51A_filt$T_Q9_1*1000, 
+                                               ifelse (Ho_Muc4B51A_filt$T_Q9a_1 == 'option_1', Ho_Muc4B51A_filt$T_Q9_1*1, 
+                                                       ifelse (Ho_Muc4B51A_filt$T_Q9a_1 == 'option_4', Ho_Muc4B51A_filt$T_Q9_1*900, Ho_Muc4B51A_filt$T_Q9_1)))) # Assumes / 3 cm: 800-1000 fishes/ kg
 
 
 V3c_Obs <- sum (!is.na(Ho_Muc4B51A_filt$T_Q9_1_rec [Ho_Muc4B51A_filt$Purchased == TRUE]))
@@ -398,6 +393,8 @@ summary_table <- data.frame(
 summary_table
 
 write.csv(summary_table, "Output/Tab10.csv", row.names = FALSE)
+
+
 
 # Hatchery characteristics (text-only)
 curl_function ("data/raw/Genetics/Tilapia/hatchery_data_anonymized.csv")
@@ -464,39 +461,32 @@ table (Ha$R_Q7_1)
 # Figure 12. Map of tilapia strain assignments on three different samples: (a) all tilapia-farming households (n=204), (b) households that purchased fingerlings in the last 3 years (n=62), and (c) hatcheries (n=89) ----
 
 # Map C. Strain by hatcheries
-curl_function("data/raw/Genetics/Tilapia/hatchery_data_anonymized.csv")
-Ha <- read.csv ("data/raw/Genetics/Tilapia/hatchery_data_anonymized.csv")
+curl_function("data/raw/Genetics/Tilapia/Ha_12c_anonymized.csv")
+Ha_12c <- read.csv ("data/raw/Genetics/Tilapia/Ha_12c_anonymized.csv")
 
-curl_function("data/raw/Genetics/Tilapia/Hatch.vars.csv")
-Ha.DNA <- read.csv ("data/raw/Genetics/Tilapia/Hatch.vars.csv") # See l.840 for sourcing
-# # Note: imported from previous section
-# 
-# Ha <- merge (Ha [, c(11,185,186)], Ha.DNA, by = 'I_Q2', all.y=TRUE);
-# Ha <- Ha [complete.cases(Ha$S_Q1.Longitude_anonymized, Ha$S_Q1.Latitude_1), ]
-# 
-# Ha$S1_Strain <- ifelse (Ha$S1_Strain == 'RIA1', 'RIA1 lineage', 
-#                         ifelse (Ha$S1_Strain == '03_BEST', 'BEST', 
-#                                 ifelse (Ha$S1_Strain == 'GenoMAR Gain', 'GenoMar Gain', Ha$S1_Strain)))
-# 
-# desired_order <- c('RIA1 lineage', 'BEST', 'Molobicus', 'GenoMar Gain'); Ha$S1_Strain <- factor(Ha$S1_Strain, levels = desired_order)
-# 
-# Ha_sf <- st_as_sf(data.frame(longitude = Ha$S_Q1.Longitude_anonymized, latitude = Ha$S_Q1.Latitude_anonymized), coords = c("longitude", "latitude"))
-# st_crs(Ha_sf) <- st_crs(modified_map) <- st_crs("+proj=longlat")
-# 
-# FigC <- ggplot() +
-#   geom_sf(data = modified_map, fill = "white", color = "black") +
-#   geom_sf(data = Ha_sf, aes(color = Ha$S1_Strain), size = 2.5) +
-#   ggtitle("(c) Hatcheries") +
-#   scale_color_manual(name = "Tilapia strains",
-#                      values = c("RIA1 lineage" = "dodgerblue",
-#                                 "BEST" = "forestgreen",
-#                                 "Molobicus" = "darkorange",
-#                                 "O. Mossambicus" = "firebrick",
-#                                 'GenoMar Gain' = 'darkorchid1',
-#                                 "Unassigned" = "grey")) +
-#   theme(plot.title = element_text(hjust = 0.5, vjust = 3), legend.position = "bottom")  # Position legend at the bottom
-# 
-# FigC
+Ha_12c$S1_Strain <- ifelse (Ha_12c$S1_Strain == 'RIA1', 'RIA1 lineage', 
+                         ifelse (Ha_12c$S1_Strain == '03_BEST', 'BEST', 
+                                 ifelse (Ha_12c$S1_Strain == 'GenoMAR Gain', 'GenoMar Gain', Ha_12c$S1_Strain)))
+
+desired_order <- c('RIA1 lineage', 'BEST', 'Molobicus', 'GenoMar Gain'); Ha_12c$S1_Strain <- factor(Ha_12c$S1_Strain, levels = desired_order)
+ 
+Ha_12c_sf <- st_as_sf(data.frame(longitude = Ha_12c$S_Q1.Longitude_anonymized, latitude = Ha_12c$S_Q1.Latitude_anonymized), coords = c("longitude", "latitude"))
+st_crs(Ha_12c_sf) <- st_crs(modified_map) <- st_crs("+proj=longlat")
+ 
+FigC <- ggplot() +
+   geom_sf(data = modified_map, fill = "white", color = "black") +
+   geom_sf(data = Ha_12c_sf, aes(color = Ha_12c$S1_Strain), size = 2.5) +
+   ggtitle("(c) Hatcheries") +
+   scale_color_manual(name = "Tilapia strains",
+                      values = c("RIA1 lineage" = "dodgerblue",
+                                 "BEST" = "forestgreen",
+                                 "Molobicus" = "darkorange",
+                                 "O. Mossambicus" = "firebrick",
+                                 'GenoMar Gain' = 'darkorchid1',
+                                 "Unassigned" = "grey")) +
+   theme(plot.title = element_text(hjust = 0.5, vjust = 3), legend.position = "bottom")  # Position legend at the bottom
+
+
 
 # Map A. Strain by households 
 curl_function("data/raw/Genetics/Tilapia/GIFT.vars.VH24.csv")
@@ -517,7 +507,6 @@ HH$Strain <- ifelse (HH$Strain == 'RIA1', 'RIA1 lineage',
 desired_order <- c('RIA1 lineage', 'BEST', 'Molobicus', 'O. Mossambicus', 'Unassigned')
 HH$Strain <- factor(HH$Strain, levels = desired_order)
 
-#HH_sf <- st_as_sf(data.frame(longitude = HH$S_Q1.Longitude_anonymized, latitude = HH$S_Q1.Latitude_anonymized), coords = c("longitude", "latitude"))
 HH_sf <- st_as_sf(
   HH[, c("S_Q1.Longitude_anonymized", "S_Q1.Latitude_anonymized", "Strain")],
   coords = c("S_Q1.Longitude_anonymized", "S_Q1.Latitude_anonymized"),
@@ -541,8 +530,6 @@ FigA <- ggplot() +
 
 
 # Map B. Strain by purchasing-households 
-#HH <- read.csv ("C:/Users/FKosmowski/OneDrive - CGIAR/DocumentsRedirected/2023 Activities/D. GIFT Experiment/Data/Final datasets/HouseholdModule_WIDE_anonymized.csv")
-# Run previous lines to have 'HH'
 
 # Data 1; DEPOCEN-SPIA survey (n=204)
 curl_function ("data/raw/Genetics/Tilapia/HouseholdModule_WIDE_anonymized.csv")
@@ -589,6 +576,4 @@ FigB
 # Note: Legends are turned off and some plot, and graphically rearranged later
 
 library (gridExtra)
-grid.arrange(FigA, FigB, ncol = 2) #ADD FigC, 
-
-
+grid.arrange(FigA, FigB, FigC, ncol = 3) 
